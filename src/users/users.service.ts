@@ -65,7 +65,7 @@ export class UsersService {
       case Role.USER:
         const users = await this.userRepository.find({
           select: ['id', 'document', 'fullName', 'email', 'address'],
-          where: { role: Role.USER },
+          where: { role: Role.USER, isActive: true },
           take: limit,
           skip: offset,
           relations: {
@@ -78,7 +78,7 @@ export class UsersService {
       case Role.ADMIN:
         const admins = await this.userRepository.find({
           select: ['id', 'document', 'fullName', 'email'],
-          where: { role: Role.ADMIN },
+          where: { role: Role.ADMIN, isActive: true },
           take: limit,
           skip: offset,
         });
