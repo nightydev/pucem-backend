@@ -16,8 +16,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Teslo RESTful API')
-    .setDescription('Teslo Shop')
+    .setTitle('PUCEM BACKEND RESTful API')
+    .setDescription('PUCEM BACKEND API documentation by Pepito & Swagger :)')
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

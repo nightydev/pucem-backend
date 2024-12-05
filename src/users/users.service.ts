@@ -9,7 +9,7 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-import { arrayMaxSize } from 'class-validator';
+import { emptyDtoException, handleDBExceptions } from 'src/common/utils';
 
 @Injectable()
 export class UsersService {
@@ -39,7 +39,7 @@ export class UsersService {
       return { message: `User created successfully` };
 
     } catch (error) {
-      this.handleDBExceptions(error);
+      handleDBExceptions(error, this.logger);
     }
   }
 
@@ -57,12 +57,13 @@ export class UsersService {
       return { message: `Admin created successfully` };
 
     } catch (error) {
-      this.handleDBExceptions(error);
+      handleDBExceptions(error, this.logger);
     }
   }
 
   async findAll(paginationDto: PaginationDto, role: Role) {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit = 10, page = 1 } = paginationDto;
+    const offset = (page - 1) * limit;
 
     switch (role) {
       case Role.USER:
@@ -102,7 +103,7 @@ export class UsersService {
   }
 
   async updateUser(updateUserDto: UpdateUserDto, id: string) {
-    this.emptyDtoException(updateUserDto);
+    emptyDtoException(updateUserDto);
 
     const { career, ...restUser } = updateUserDto;
     const user = await this.findOne(id);
@@ -121,7 +122,7 @@ export class UsersService {
   }
 
   async updateAdmin(updateAdminDto: UpdateAdminDto, id: string) {
-    this.emptyDtoException(updateAdminDto);
+    emptyDtoException(updateAdminDto);
 
     const admin = await this.findOne(id);
     const newAdmin = {
@@ -138,20 +139,5 @@ export class UsersService {
     });
 
     return { message: `User soft deleted` };
-  }
-
-  private handleDBExceptions(error: any) {
-    if (error.code === '23505') {
-      throw new BadRequestException(error.detail);
-    }
-
-    this.logger.error(error);
-    throw new InternalServerErrorException('Unexpected error, check server logs');
-  }
-
-  private emptyDtoException(dto: any) {
-    if (!dto || Object.keys(dto).length === 0) {
-      throw new BadRequestException('Send data to update');
-    }
   }
 }

@@ -4,6 +4,7 @@ import { UpdateCareerDto } from './dto/update-career.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Career } from './entities/career.entity';
 import { Repository } from 'typeorm';
+import { emptyDtoException, handleDBExceptions } from 'src/common/utils';
 
 @Injectable()
 export class CareersService {
@@ -23,7 +24,7 @@ export class CareersService {
       return career;
 
     } catch (error) {
-      this.handleDBExceptions(error);
+      handleDBExceptions(error, this.logger);
     }
   }
 
@@ -44,6 +45,8 @@ export class CareersService {
   }
 
   async update(id: string, updateCareerDto: UpdateCareerDto) {
+    emptyDtoException(updateCareerDto);
+
     if (!updateCareerDto || Object.keys(updateCareerDto).length === 0) {
       throw new BadRequestException('Send data to update');
     }
@@ -61,14 +64,5 @@ export class CareersService {
     await this.careerRepository.remove(career);
 
     return { message: `Career with id ${id} deleted successfully` };
-  }
-
-  private handleDBExceptions(error: any) {
-    if (error.code === '23505') {
-      throw new BadRequestException(error.detail);
-    }
-
-    this.logger.error(error);
-    throw new InternalServerErrorException('Unexpected error, check server logs');
   }
 }
