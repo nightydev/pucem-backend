@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entities/user.entity';
@@ -7,6 +7,9 @@ import { Repository } from 'typeorm';
 import { CareersService } from 'src/careers/careers.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateAdminDto } from './dto/update-admin.dto';
+import { arrayMaxSize } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -89,6 +92,54 @@ export class UsersService {
     }
   }
 
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({ where: { id }, relations: ['career'] });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async updateUser(updateUserDto: UpdateUserDto, id: string) {
+    this.emptyDtoException(updateUserDto);
+
+    const { career, ...restUser } = updateUserDto;
+    const user = await this.findOne(id);
+
+    if (career) {
+      const newCareer = await this.careerService.findOne(career);
+      const newUser = {
+        ...user,
+        ...restUser,
+        career: newCareer
+      };
+
+      return await this.userRepository.save(newUser);
+    }
+
+  }
+
+  async updateAdmin(updateAdminDto: UpdateAdminDto, id: string) {
+    this.emptyDtoException(updateAdminDto);
+
+    const admin = await this.findOne(id);
+    const newAdmin = {
+      ...admin,
+      ...updateAdminDto
+    };
+
+    return await this.userRepository.save(newAdmin);
+  }
+
+  async softDelete(id: string) {
+    await this.userRepository.update(id, {
+      isActive: false
+    });
+
+    return { message: `User soft deleted` };
+  }
+
   private handleDBExceptions(error: any) {
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
@@ -96,5 +147,11 @@ export class UsersService {
 
     this.logger.error(error);
     throw new InternalServerErrorException('Unexpected error, check server logs');
+  }
+
+  private emptyDtoException(dto: any) {
+    if (!dto || Object.keys(dto).length === 0) {
+      throw new BadRequestException('Send data to update');
+    }
   }
 }

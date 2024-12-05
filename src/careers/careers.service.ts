@@ -30,7 +30,7 @@ export class CareersService {
   async findOne(id: string) {
     const career = await this.careerRepository.findOne({ where: { id } });
     if (!career) {
-      throw new NotFoundException(`Item with id ${id} not found`);
+      throw new NotFoundException(`Career with id ${id} not found`);
     }
 
     return career;
@@ -44,6 +44,10 @@ export class CareersService {
   }
 
   async update(id: string, updateCareerDto: UpdateCareerDto) {
+    if (!updateCareerDto || Object.keys(updateCareerDto).length === 0) {
+      throw new BadRequestException('Send data to update');
+    }
+
     const { careerName } = updateCareerDto;
     const career = await this.findOne(id);
 
