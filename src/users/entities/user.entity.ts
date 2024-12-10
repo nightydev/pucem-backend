@@ -32,7 +32,12 @@ export class User {
   @Column('text', {
     nullable: false
   })
-  fullName: string;
+  name: string;
+
+  @Column('text', {
+    nullable: false
+  })
+  lastName: string;
 
   @Column('text', {
     nullable: true

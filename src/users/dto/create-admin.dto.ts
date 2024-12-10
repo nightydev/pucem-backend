@@ -28,12 +28,20 @@ export class CreateAdminDto {
   email: string;
 
   @ApiProperty({
-    description: `Admin's fullname`,
-    example: 'JOSE MANUEL TERAN SANDOVAL'
+    description: `Admin's name`,
+    example: 'Jose'
   })
   @IsString()
   @MinLength(1)
-  fullName: string;
+  name: string;
+
+  @ApiProperty({
+    description: `Admin's last name`,
+    example: 'Teran'
+  })
+  @IsString()
+  @MinLength(1)
+  lastName: string;
 
   @ApiProperty({
     description: `Admin's career ID`,

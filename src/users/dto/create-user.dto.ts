@@ -28,12 +28,20 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({
-    description: `User's fullname`,
-    example: 'JOSE MANUEL TERAN SANDOVAL'
+    description: `User's name`,
+    example: 'Jose'
   })
   @IsString()
   @MinLength(1)
-  fullName: string;
+  name: string;
+
+  @ApiProperty({
+    description: `User's last name`,
+    example: 'Teran'
+  })
+  @IsString()
+  @MinLength(1)
+  lastName: string;
 
   @ApiProperty({
     description: `User's home address`,

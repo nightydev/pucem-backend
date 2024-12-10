@@ -71,7 +71,7 @@ export class UsersService {
     switch (role) {
       case Role.USER:
         const [users, totalUsers] = await this.userRepository.findAndCount({
-          select: ['id', 'document', 'fullName', 'email', 'address'],
+          select: ['id', 'document', 'name', 'lastName', 'email', 'address'],
           where: { role: Role.USER, isActive: true },
           take: limit,
           skip: offset,
@@ -84,7 +84,7 @@ export class UsersService {
 
       case Role.ADMIN:
         const [admins, totalAdmins] = await this.userRepository.findAndCount({
-          select: ['id', 'document', 'fullName', 'email'],
+          select: ['id', 'document', 'name', 'lastName', 'email'],
           where: { role: Role.ADMIN, isActive: true },
           take: limit,
           skip: offset,

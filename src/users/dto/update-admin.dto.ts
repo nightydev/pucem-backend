@@ -10,7 +10,7 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsString()
   @Length(10)
-  document: string;
+  document?: string;
 
   @ApiProperty({
     description: `Admin's login password, by default it is the same as the document`,
@@ -28,16 +28,25 @@ export class UpdateAdminDto {
   })
   @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @ApiProperty({
-    description: `Admin's fullname`,
-    example: 'JOSE MANUEL TERAN SANDOVAL'
+    description: `Admin's name`,
+    example: 'Jose'
   })
   @IsOptional()
   @IsString()
   @MinLength(1)
-  fullName: string;
+  name?: string;
+
+  @ApiProperty({
+    description: `Admin's last name`,
+    example: 'Teran'
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  lastName?: string;
 
   @ApiProperty({
     description: `Admin's career ID`,
