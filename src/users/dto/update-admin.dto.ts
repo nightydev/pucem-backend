@@ -1,6 +1,5 @@
-import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { CreateAdminDto } from "./create-admin.dto";
-import { IsEmail, IsString, Length, MaxLength, MinLength } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsString, Length, MinLength } from "class-validator";
 
 export class UpdateAdminDto { 
 

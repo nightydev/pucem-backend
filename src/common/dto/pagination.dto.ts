@@ -6,7 +6,7 @@ export class PaginationDto {
 
   @ApiProperty({
     default: 10,
-    description: 'How many rows do you need'
+    description: 'Number of results per page'
   })
   @IsInt()
   @IsOptional()

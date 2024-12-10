@@ -21,7 +21,7 @@ export class CareersService {
       const career = this.careerRepository.create(createCareerDto);
       await this.careerRepository.save(career);
 
-      return career;
+      return { message: `Career created successfully`, career };
 
     } catch (error) {
       handleDBExceptions(error, this.logger);
@@ -63,6 +63,6 @@ export class CareersService {
     const career = await this.findOne(id);
     await this.careerRepository.remove(career);
 
-    return { message: `Career with id ${id} deleted successfully` };
+    return { message: `Career with ID ${id} deleted successfully` };
   }
 }

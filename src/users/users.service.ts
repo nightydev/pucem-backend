@@ -36,7 +36,7 @@ export class UsersService {
 
       await this.userRepository.save(user);
 
-      return { message: `User created successfully` };
+      return { message: `User created successfully`, user };
 
     } catch (error) {
       handleDBExceptions(error, this.logger);
@@ -54,7 +54,7 @@ export class UsersService {
 
       await this.userRepository.save(admin);
 
-      return { message: `Admin created successfully` };
+      return { message: `Admin created successfully`, admin };
 
     } catch (error) {
       handleDBExceptions(error, this.logger);
@@ -116,9 +116,19 @@ export class UsersService {
         career: newCareer
       };
 
-      return await this.userRepository.save(newUser);
+      await this.userRepository.save(newUser);
+
+      return { message: `User updated successfully`, newUser };
     }
 
+    const newUser = {
+      ...user,
+      ...restUser
+    };
+
+    await this.userRepository.save(newUser);
+
+    return { message: `User updated successfully`, newUser };
   }
 
   async updateAdmin(updateAdminDto: UpdateAdminDto, id: string) {
@@ -130,7 +140,10 @@ export class UsersService {
       ...updateAdminDto
     };
 
-    return await this.userRepository.save(newAdmin);
+    await this.userRepository.save(newAdmin);
+
+    return { message: `Admin updated successfully`, newAdmin };
+
   }
 
   async softDelete(id: string) {
@@ -138,6 +151,6 @@ export class UsersService {
       isActive: false
     });
 
-    return { message: `User soft deleted` };
+    return { message: `User with ID ${id} soft deleted` };
   }
 }

@@ -45,11 +45,11 @@ export class UsersController {
     default: 10,
   })
   @ApiQuery({
-    name: 'offset',
-    description: 'Number of rows to skip',
+    name: 'page',
+    description: 'What page do you need',
     required: false,
     type: Number,
-    default: 0,
+    default: 1,
   })
   findAll(
     @Query() paginationDto: PaginationDto,
