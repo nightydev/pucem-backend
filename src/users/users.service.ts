@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Delete } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entities/user.entity';
@@ -45,10 +45,13 @@ export class UsersService {
 
   async createAdmin(createAdminDto: CreateAdminDto) {
     try {
-      const { password, ...restAdmin } = createAdminDto;
+      const { career, password, ...restAdmin } = createAdminDto;
+      const chosenCareer = await this.careerService.findOne(career);
+
       const admin = this.userRepository.create({
         ...restAdmin,
         password: bcrypt.hashSync(password, 10),
+        career: chosenCareer,
         role: Role.ADMIN
       });
 
@@ -67,31 +70,32 @@ export class UsersService {
 
     switch (role) {
       case Role.USER:
-        const users = await this.userRepository.find({
+        const [users, totalUsers] = await this.userRepository.findAndCount({
           select: ['id', 'document', 'fullName', 'email', 'address'],
           where: { role: Role.USER, isActive: true },
           take: limit,
           skip: offset,
           relations: {
             career: true,
-            team: true
-          }
+            team: true,
+          },
         });
-        return users;
+        return { users, total: totalUsers };
 
       case Role.ADMIN:
-        const admins = await this.userRepository.find({
+        const [admins, totalAdmins] = await this.userRepository.findAndCount({
           select: ['id', 'document', 'fullName', 'email'],
           where: { role: Role.ADMIN, isActive: true },
           take: limit,
           skip: offset,
         });
-        return admins;
+        return { admins, total: totalAdmins };
 
       default:
-        throw new BadRequestException('Invalid role')
+        throw new BadRequestException('Invalid role');
     }
   }
+
 
   async findOne(id: string) {
     const user = await this.userRepository.findOne({ where: { id }, relations: ['career'] });
@@ -105,28 +109,33 @@ export class UsersService {
   async updateUser(updateUserDto: UpdateUserDto, id: string) {
     emptyDtoException(updateUserDto);
 
-    const { career, ...restUser } = updateUserDto;
+    const { career, password, ...restUser } = updateUserDto;
+
     const user = await this.findOne(id);
 
+    let newUser: any;
     if (career) {
       const newCareer = await this.careerService.findOne(career);
-      const newUser = {
+      newUser = {
         ...user,
         ...restUser,
         career: newCareer
       };
-
-      await this.userRepository.save(newUser);
-
-      return { message: `User updated successfully`, newUser };
+    } else {
+      newUser = {
+        ...user,
+        ...restUser
+      };
     }
 
-    const newUser = {
-      ...user,
-      ...restUser
-    };
+    if (password) {
+      newUser.password = bcrypt.hashSync(password, 10);
+    }
 
     await this.userRepository.save(newUser);
+
+    delete newUser.password;
+    delete newUser.resetPasswordToken;
 
     return { message: `User updated successfully`, newUser };
   }
@@ -134,16 +143,37 @@ export class UsersService {
   async updateAdmin(updateAdminDto: UpdateAdminDto, id: string) {
     emptyDtoException(updateAdminDto);
 
+    const { career, password, ...restAdmin } = updateAdminDto;
+
     const admin = await this.findOne(id);
-    const newAdmin = {
-      ...admin,
-      ...updateAdminDto
-    };
+    let newAdmin: any;
+    if (career) {
+      const newCareer = await this.careerService.findOne(career);
+      newAdmin = {
+        ...admin,
+        ...restAdmin,
+        career: newCareer
+      };
+    } else {
+      newAdmin = {
+        ...admin,
+        ...restAdmin
+      };
+    }
+
+    if (password) {
+      newAdmin.password = bcrypt.hashSync(password, 10);
+    }
 
     await this.userRepository.save(newAdmin);
 
-    return { message: `Admin updated successfully`, newAdmin };
+    delete newAdmin.password;
+    delete newAdmin.resetPasswordToken;
+    delete newAdmin.address;
+    delete newAdmin.role;
+    delete newAdmin.team;
 
+    return { message: `Admin updated successfully`, newAdmin };
   }
 
   async softDelete(id: string) {
