@@ -13,12 +13,20 @@ export class CreateCaregiverDto {
   document: string;
 
   @ApiProperty({
-    description: `Caregiver's fullname`,
-    example: 'JOSE MANUEL TERAN SANDOVAL'
+    description: `Caregiver's name`,
+    example: 'Jose'
   })
   @IsNotEmpty()
   @IsString()
-  fullName: string;
+  name: string;
+
+  @ApiProperty({
+    description: `Caregiver's last name`,
+    example: 'Teran'
+  })
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
 
   @ApiProperty({
     description: `Gender`,

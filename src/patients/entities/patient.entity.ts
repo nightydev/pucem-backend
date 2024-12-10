@@ -22,7 +22,12 @@ export class Patient {
   @Column('text', {
     nullable: false
   })
-  fullName: string;
+  name: string;
+
+  @Column('text', {
+    nullable: false
+  })
+  lastName: string;
 
   @Column('enum', {
     enum: Gender,
