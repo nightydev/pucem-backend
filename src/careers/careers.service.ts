@@ -47,16 +47,14 @@ export class CareersService {
   async update(id: string, updateCareerDto: UpdateCareerDto) {
     emptyDtoException(updateCareerDto);
 
-    if (!updateCareerDto || Object.keys(updateCareerDto).length === 0) {
-      throw new BadRequestException('Send data to update');
-    }
-
     const { careerName } = updateCareerDto;
     const career = await this.findOne(id);
 
     career.careerName = careerName;
 
-    return this.careerRepository.save(career);
+    await this.careerRepository.save(career);
+
+    return { message: `Career updated successfully`, career };
   }
 
   async remove(id: string) {
