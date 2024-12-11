@@ -4,7 +4,6 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CareersModule } from 'src/careers/careers.module';
-import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
