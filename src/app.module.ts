@@ -27,16 +27,10 @@ import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
       ssl: {
         rejectUnauthorized: true,
         ca: fs
-          .readFileSync(
-            path.join(
-              __dirname,
-              '../',
-              process.env.DB_SSL_FILE,
-            ),
-          )
-          .toString()
+          .readFileSync(path.join(__dirname, '../', process.env.DB_SSL_FILE))
+          .toString(),
       },
-      namingStrategy: new SnakeNamingStrategy
+      namingStrategy: new SnakeNamingStrategy(),
     }),
     UsersModule,
     AuthModule,
@@ -44,9 +38,9 @@ import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
     TeamsModule,
     GroupsModule,
     PatientsModule,
-    CaregiversModule
+    CaregiversModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
