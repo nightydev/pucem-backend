@@ -8,9 +8,7 @@ import { AuthModule } from 'src/auth/auth.module';
 @Module({
   controllers: [CaregiversController],
   providers: [CaregiversService],
-  imports: [
-    TypeOrmModule.forFeature([Caregiver]),
-    AuthModule
-  ],
+  imports: [TypeOrmModule.forFeature([Caregiver]), AuthModule],
+  exports: [TypeOrmModule],
 })
-export class CaregiversModule { }
+export class CaregiversModule {}
