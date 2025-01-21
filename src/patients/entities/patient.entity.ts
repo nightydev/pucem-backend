@@ -1,10 +1,12 @@
 import { Caregiver } from 'src/caregivers/entities/caregiver.entity';
 import { Team } from 'src/teams/entities/team.entity';
+import { LaboratoryRequest } from 'src/laboratory-request/entities/laboratory-request.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -79,4 +81,13 @@ export class Patient {
 
   @OneToOne(() => Team, (team) => team.patient, { cascade: true })
   team: Team;
+
+  @OneToMany(
+    () => LaboratoryRequest,
+    (laboratoryRequest) => laboratoryRequest.patient,
+    {
+      nullable: true,
+    },
+  )
+  laboratoryRequests: LaboratoryRequest[];
 }

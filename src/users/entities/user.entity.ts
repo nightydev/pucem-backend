@@ -1,6 +1,13 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Career } from "src/careers/entities/career.entity";
-import { Team } from "src/teams/entities/team.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Career } from 'src/careers/entities/career.entity';
+import { Team } from 'src/teams/entities/team.entity';
+import { LaboratoryRequest } from 'src/laboratory-request/entities/laboratory-request.entity';
 
 export enum Role {
   USER = 'user',
@@ -9,43 +16,42 @@ export enum Role {
 
 @Entity({ name: 'users' })
 export class User {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column('text', {
-    unique: true
+    unique: true,
   })
   document: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   password: string;
 
   @Column('text', {
     unique: true,
-    nullable: false
+    nullable: false,
   })
   email: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   name: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   lastName: string;
 
   @Column('text', {
-    nullable: true
+    nullable: true,
   })
   address: string;
 
   @Column('text', {
-    nullable: true
+    nullable: true,
   })
   resetPasswordToken: string;
 
@@ -56,22 +62,22 @@ export class User {
 
   @Column('enum', {
     enum: Role,
-    nullable: false
+    nullable: false,
   })
   role: Role;
 
-  @ManyToOne(
-    () => Career,
-    (career) => career.user,
-    { nullable: true }
-  )
+  @ManyToOne(() => Career, (career) => career.user, { nullable: true })
   career: Career;
 
-  @ManyToOne(
-    () => Team,
-    (team) => team.user,
-    { nullable: true }
-  )
+  @ManyToOne(() => Team, (team) => team.user, { nullable: true })
   team: Team;
 
+  @OneToMany(
+    () => LaboratoryRequest,
+    (laboratoryRequest) => laboratoryRequest.user,
+    {
+      nullable: true,
+    },
+  )
+  laboratoryRequests: LaboratoryRequest[];
 }
