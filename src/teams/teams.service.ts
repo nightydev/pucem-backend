@@ -20,7 +20,7 @@ export class TeamsService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
-  ) {}
+  ) { }
 
   async create(createTeamDto: CreateTeamDto) {
     try {
@@ -53,6 +53,7 @@ export class TeamsService {
     const [teams, total] = await this.teamRepository.findAndCount({
       take: limit,
       skip: offset,
+      relations: ['patient', 'group']
     });
 
     return { teams, total };
