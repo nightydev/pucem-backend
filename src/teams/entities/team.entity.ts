@@ -24,11 +24,10 @@ export class Team {
   teamName: string;
 
   @ManyToOne(() => Group, (group) => group.team, { nullable: false })
-  @JoinColumn({ name: 'group_id' })
   group: Group;
 
   @OneToOne(() => Patient, (patient) => patient.team, { nullable: false })
-  @JoinColumn({ name: 'patient_id' })
+  @JoinColumn()
   patient: Patient;
 
   @OneToMany(() => User, (user) => user.team, { cascade: true })
