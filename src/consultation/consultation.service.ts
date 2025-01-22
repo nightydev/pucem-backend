@@ -1,0 +1,95 @@
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CreateConsultationInitialDto } from './dto/create-consultation-initial.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConsultationInitial } from './entities/consultation-initial.entity';
+import { Repository } from 'typeorm';
+import { ConsultationSubsequent } from './entities/consultation-subsequent.entity';
+import { CreateConsultationSubsequentDto } from './dto/create-consultation-subsequent.dto';
+import { handleDBExceptions } from 'src/common/utils';
+import { UsersService } from 'src/users/users.service';
+import { PatientsService } from 'src/patients/patients.service';
+
+@Injectable()
+export class ConsultationService {
+
+  private readonly logger = new Logger(ConsultationService.name);
+
+  constructor(
+    @InjectRepository(ConsultationInitial)
+    private readonly consultationInitialRepository: Repository<ConsultationInitial>,
+    @InjectRepository(ConsultationSubsequent)
+    private readonly consultationSubsequentRepository: Repository<ConsultationSubsequent>,
+    private readonly usersService: UsersService,
+    private readonly patientsService: PatientsService
+  ) { }
+
+  async createInitial(createConsultationInitialDto: CreateConsultationInitialDto) {
+    try {
+      const { user, patient, ...rest } = createConsultationInitialDto;
+
+      const userExists = await this.usersService.findOne(user);
+      const patientExists = await this.patientsService.findOne(patient);
+
+      const consultation = this.consultationInitialRepository.create({
+        ...rest,
+        user: userExists,
+        patient: patientExists,
+        fecha: new Date()
+      });
+      await this.consultationInitialRepository.save(consultation);
+
+      return { message: `Consultation created successfully`, consultation };
+
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
+  }
+
+  async createSubsequent(createConsultationSubsequentDto: CreateConsultationSubsequentDto) {
+    try {
+      const { user, patient, consultationInitial, ...rest } = createConsultationSubsequentDto;
+
+      const userExists = await this.usersService.findOne(user);
+      const patientExists = await this.patientsService.findOne(patient);
+      const consultationInitialExists = await this.findOneInitial(consultationInitial);
+
+      const consultation = this.consultationSubsequentRepository.create({
+        ...rest,
+        user: userExists,
+        patient: patientExists,
+        consultationInitial: consultationInitialExists,
+        fecha: new Date()
+      });
+      await this.consultationSubsequentRepository.save(consultation);
+
+      return { message: `Consultation created successfully`, consultation };
+
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
+  }
+
+  findAll() {
+    return `This action returns all consultation`;
+  }
+
+  async findOneInitial(id: string) {
+    const consultation = await this.consultationInitialRepository.findOne({ where: { id } });
+    if (!consultation) {
+      throw new NotFoundException(`Consultation with id ${id} not found`);
+    }
+    return consultation;
+  }
+
+  async findLastSubsequent(id: string) {
+    const consultation = await this.consultationSubsequentRepository.findOne({ where: { consultationInitial: { id } }, order: { fecha: 'DESC' } });
+    if (!consultation) {
+      throw new NotFoundException(`Consultation subsequent not found`);
+    }
+    return consultation;
+  }
+
+  remove(id: string) {
+    return `This action removes a #${id} consultation`;
+  }
+}

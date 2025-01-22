@@ -8,6 +8,8 @@ import {
 import { Career } from 'src/careers/entities/career.entity';
 import { Team } from 'src/teams/entities/team.entity';
 import { LaboratoryRequest } from 'src/laboratory-request/entities/laboratory-request.entity';
+import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
+import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
 
 export enum Role {
   USER = 'user',
@@ -80,4 +82,11 @@ export class User {
     },
   )
   laboratoryRequests: LaboratoryRequest[];
+
+  @OneToMany(() => ConsultationInitial, (consultationInitial) => consultationInitial.user)
+  consultationInitial: ConsultationInitial;
+
+  @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.user)
+  consultationSubsequent: ConsultationSubsequent;
+
 }

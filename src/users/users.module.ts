@@ -14,6 +14,6 @@ import { AuthModule } from 'src/auth/auth.module';
     CareersModule,
     AuthModule
   ],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, UsersService]
 })
-export class UsersModule {}
+export class UsersModule { }

@@ -17,4 +17,4 @@ import { CaregiversModule } from 'src/caregivers/caregivers.module';
   ],
   exports: [TypeOrmModule, PatientsService],
 })
-export class PatientsModule {}
+export class PatientsModule { }

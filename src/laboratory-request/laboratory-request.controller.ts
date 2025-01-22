@@ -28,7 +28,7 @@ import { Role } from 'src/users/entities/user.entity';
 export class LaboratoryRequestController {
   constructor(
     private readonly laboratoryRequestService: LaboratoryRequestService,
-  ) {}
+  ) { }
 
   @Post()
   @Auth(Role.USER)

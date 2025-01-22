@@ -9,6 +9,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
+import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -90,4 +92,10 @@ export class Patient {
     },
   )
   laboratoryRequests: LaboratoryRequest[];
+
+  @OneToMany(() => ConsultationInitial, (consultationInitial) => consultationInitial.patient)
+  consultationInitial: ConsultationInitial;
+
+  @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.patient)
+  consultationSubsequent: ConsultationSubsequent;
 }
