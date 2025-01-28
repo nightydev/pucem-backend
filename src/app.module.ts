@@ -26,8 +26,10 @@ import { ConsultationModule } from './consultation/consultation.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      // TODO: Después de que Azure complete la actualización de certificados SSL intermedios (iniciada el 31 de enero de 2024),
+      // descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
       ssl: {
-        rejectUnauthorized: true,
+        rejectUnauthorized: false,
         ca: fs
           .readFileSync(path.join(__dirname, '../', process.env.DB_SSL_FILE))
           .toString(),
