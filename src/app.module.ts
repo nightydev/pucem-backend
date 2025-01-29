@@ -13,6 +13,7 @@ import { CaregiversModule } from './caregivers/caregivers.module';
 import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
 import { LaboratoryRequestModule } from './laboratory-request/laboratory-request.module';
 import { ConsultationModule } from './consultation/consultation.module';
+import { ConsultationInternalModule } from './internal/consultationInternal.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ConsultationModule } from './consultation/consultation.module';
     CaregiversModule,
     LaboratoryRequestModule,
     ConsultationModule,
+    ConsultationInternalModule,
   ],
   controllers: [],
   providers: [],

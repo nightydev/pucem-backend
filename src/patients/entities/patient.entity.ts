@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
 import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
+import { ConsultationInternal } from 'src/internal/entities/consultation-internal.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -98,4 +99,8 @@ export class Patient {
 
   @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.patient)
   consultationSubsequent: ConsultationSubsequent;
+
+  // Nueva relación con ConsultationInternal
+  @OneToMany(() => ConsultationInternal, (consultationInternal) => consultationInternal.patient)
+  consultationInternal: ConsultationInternal[];
 }

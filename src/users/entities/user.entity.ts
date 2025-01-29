@@ -10,6 +10,7 @@ import { Team } from 'src/teams/entities/team.entity';
 import { LaboratoryRequest } from 'src/laboratory-request/entities/laboratory-request.entity';
 import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
 import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
+import { ConsultationInternal } from 'src/internal/entities/consultation-internal.entity';
 
 export enum Role {
   USER = 'user',
@@ -89,4 +90,6 @@ export class User {
   @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.user)
   consultationSubsequent: ConsultationSubsequent;
 
+  @OneToMany(() => ConsultationInternal, (consultationInternal) => consultationInternal.user)
+  consultationInternal: ConsultationInternal;
 }
