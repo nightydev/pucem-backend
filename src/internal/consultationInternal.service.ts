@@ -20,7 +20,6 @@ export class ConsultationInternalService {
     private readonly patientsService: PatientsService
   ) {}
 
-  // ✅ Crear una nueva consulta interna
   async create(createConsultationInternalDto: CreateConsultationInternalDto) {
     try {
       const { user, patient, ...rest } = createConsultationInternalDto;
@@ -43,14 +42,12 @@ export class ConsultationInternalService {
     }
   }
 
-  // ✅ Obtener todas las consultas internas
   async findAll() {
     return await this.consultationInternalRepository.find({
       relations: ['user', 'patient'],
     });
   }
 
-  // ✅ Obtener una consulta interna por ID
   async findOne(id: string) {
     const consultation = await this.consultationInternalRepository.findOne({
       where: { id },
@@ -63,7 +60,6 @@ export class ConsultationInternalService {
     return consultation;
   }
 
-  // ✅ Actualizar una consulta interna por ID
   async update(id: string, updateConsultationInternalDto: UpdateConsultationInternalDto) {
     try {
       const existingConsultation = await this.findOne(id);
@@ -77,7 +73,6 @@ export class ConsultationInternalService {
     }
   }
 
-  // ✅ Eliminar una consulta interna por ID
   async remove(id: string) {
     const consultation = await this.findOne(id);
     await this.consultationInternalRepository.remove(consultation);

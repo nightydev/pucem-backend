@@ -11,7 +11,6 @@ import {
   export class ConsultationInternalController {
     constructor(private readonly consultationInternalService: ConsultationInternalService) {}
   
-    // ✅ Crear una consulta interna
     @Post()
     @ApiOperation({ summary: 'Crear una consulta interna' })
     @ApiBody({ type: CreateConsultationInternalDto })
@@ -19,14 +18,12 @@ import {
       return this.consultationInternalService.create(createConsultationInternalDto);
     }
   
-    // ✅ Obtener todas las consultas internas
     @Get()
     @ApiOperation({ summary: 'Obtener todas las consultas internas' })
     findAll() {
       return this.consultationInternalService.findAll();
     }
   
-    // ✅ Obtener una consulta interna por ID
     @Get(':id')
     @ApiOperation({ summary: 'Obtener una consulta interna por ID' })
     @ApiParam({ name: 'id', type: String, description: 'ID de la consulta interna' })
@@ -34,7 +31,6 @@ import {
       return this.consultationInternalService.findOne(id);
     }
   
-    // ✅ Actualizar una consulta interna por ID
     @Patch(':id')
     @ApiOperation({ summary: 'Actualizar una consulta interna' })
     @ApiParam({ name: 'id', type: String, description: 'ID de la consulta interna a actualizar' })
@@ -46,7 +42,6 @@ import {
       return this.consultationInternalService.update(id, updateConsultationInternalDto);
     }
   
-    // ✅ Eliminar una consulta interna por ID
     @Delete(':id')
     @ApiOperation({ summary: 'Eliminar una consulta interna' })
     @ApiParam({ name: 'id', type: String, description: 'ID de la consulta interna a eliminar' })
