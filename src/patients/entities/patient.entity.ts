@@ -7,6 +7,7 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
@@ -76,7 +77,7 @@ export class Patient {
   })
   isActive: boolean;
 
-  @OneToOne(() => Caregiver, (caregiver) => caregiver.patient, {
+  @ManyToOne(() => Caregiver, (caregiver) => caregiver.patients, {
     nullable: false,
   })
   @JoinColumn()
@@ -94,13 +95,22 @@ export class Patient {
   )
   laboratoryRequests: LaboratoryRequest[];
 
-  @OneToMany(() => ConsultationInitial, (consultationInitial) => consultationInitial.patient)
+  @OneToMany(
+    () => ConsultationInitial,
+    (consultationInitial) => consultationInitial.patient,
+  )
   consultationInitial: ConsultationInitial;
 
-  @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.patient)
+  @OneToMany(
+    () => ConsultationSubsequent,
+    (consultationSubsequent) => consultationSubsequent.patient,
+  )
   consultationSubsequent: ConsultationSubsequent;
 
   // Nueva relación con ConsultationInternal
-  @OneToMany(() => ConsultationInternal, (consultationInternal) => consultationInternal.patient)
+  @OneToMany(
+    () => ConsultationInternal,
+    (consultationInternal) => consultationInternal.patient,
+  )
   consultationInternal: ConsultationInternal[];
 }
