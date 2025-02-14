@@ -1,5 +1,5 @@
-import { Patient } from "src/patients/entities/patient.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Patient } from 'src/patients/entities/patient.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Gender {
   MALE = 'male',
@@ -8,79 +8,73 @@ export enum Gender {
 
 @Entity({ name: 'caregivers' })
 export class Caregiver {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column('text', {
     unique: true,
-    nullable: false
+    nullable: false,
   })
   document: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   name: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   lastName: string;
 
   @Column('enum', {
     enum: Gender,
-    nullable: false
+    nullable: false,
   })
   gender: Gender;
 
   @Column('text', {
     array: true,
-    nullable: true
+    nullable: true,
   })
   conventionalNumbers: string[];
 
   @Column('text', {
     array: true,
-    nullable: true
+    nullable: true,
   })
   cellphoneNumbers: string[];
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   canton: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   parish: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   zoneType: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   address: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   reference: string;
 
   @Column('text', {
-    nullable: false
+    nullable: false,
   })
   patientRelationship: string;
 
-  @OneToOne(
-    () => Patient,
-    (patient) => patient.caregiver,
-    { cascade: true }
-  )
-  patient: Patient;
-
+  @OneToMany(() => Patient, (patient) => patient.caregiver, { cascade: true })
+  patients: Patient[];
 }
