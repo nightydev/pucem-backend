@@ -1,5 +1,10 @@
-import * as bcrypt from 'bcrypt'
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Delete } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from './entities/user.entity';
@@ -13,14 +18,13 @@ import { emptyDtoException, handleDBExceptions } from 'src/common/utils';
 
 @Injectable()
 export class UsersService {
-
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly careerService: CareersService
-  ) { }
+    private readonly careerService: CareersService,
+  ) {}
 
   async createUser(createUserDto: CreateUserDto) {
     try {
@@ -31,13 +35,12 @@ export class UsersService {
         ...restUser,
         password: bcrypt.hashSync(password, 10),
         career: chosenCareer,
-        role: Role.USER
+        role: Role.USER,
       });
 
       await this.userRepository.save(user);
 
       return { message: `User created successfully`, user };
-
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
@@ -52,13 +55,12 @@ export class UsersService {
         ...restAdmin,
         password: bcrypt.hashSync(password, 10),
         career: chosenCareer,
-        role: Role.ADMIN
+        role: Role.ADMIN,
       });
 
       await this.userRepository.save(admin);
 
       return { message: `Admin created successfully`, admin };
-
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
@@ -88,6 +90,9 @@ export class UsersService {
           where: { role: Role.ADMIN, isActive: true },
           take: limit,
           skip: offset,
+          relations: {
+            career: true,
+          },
         });
         return { admins, total: totalAdmins };
 
@@ -96,9 +101,11 @@ export class UsersService {
     }
   }
 
-
   async findOne(id: string) {
-    const user = await this.userRepository.findOne({ where: { id }, relations: ['career'] });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['career'],
+    });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -119,12 +126,12 @@ export class UsersService {
       newUser = {
         ...user,
         ...restUser,
-        career: newCareer
+        career: newCareer,
       };
     } else {
       newUser = {
         ...user,
-        ...restUser
+        ...restUser,
       };
     }
 
@@ -152,12 +159,12 @@ export class UsersService {
       newAdmin = {
         ...admin,
         ...restAdmin,
-        career: newCareer
+        career: newCareer,
       };
     } else {
       newAdmin = {
         ...admin,
-        ...restAdmin
+        ...restAdmin,
       };
     }
 
@@ -178,7 +185,7 @@ export class UsersService {
 
   async softDelete(id: string) {
     await this.userRepository.update(id, {
-      isActive: false
+      isActive: false,
     });
 
     return { message: `User with ID ${id} soft deleted` };
