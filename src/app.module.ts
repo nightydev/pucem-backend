@@ -14,6 +14,7 @@ import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
 import { LaboratoryRequestModule } from './laboratory-request/laboratory-request.module';
 import { ConsultationModule } from './consultation/consultation.module';
 import { ConsultationInternalModule } from './internal/consultationInternal.module';
+import { NursingModule } from './nursing/nursing.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ConsultationInternalModule } from './internal/consultationInternal.modu
     LaboratoryRequestModule,
     ConsultationModule,
     ConsultationInternalModule,
+    NursingModule,
   ],
   controllers: [],
   providers: [],

@@ -13,6 +13,7 @@ import {
 import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
 import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
 import { ConsultationInternal } from 'src/internal/entities/consultation-internal.entity';
+import { NursingForm } from 'src/nursing/entities/nursing-form.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -113,4 +114,7 @@ export class Patient {
     (consultationInternal) => consultationInternal.patient,
   )
   consultationInternal: ConsultationInternal[];
+
+  @OneToMany(() => NursingForm, (nursingForm) => nursingForm.patient)
+  nursingForms: NursingForm[];
 }
