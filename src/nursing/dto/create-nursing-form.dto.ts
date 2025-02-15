@@ -1,7 +1,9 @@
+import { Type } from 'class-transformer';
 import { IsDate, IsString, IsArray, IsOptional } from 'class-validator';
 
 export class CreateNursingFormDto {
   @IsDate()
+  @Type(() => Date)
   fecha: Date;
 
   @IsString()
@@ -28,6 +30,7 @@ export class CreateNursingFormDto {
 
   @IsDate()
   @IsOptional()
+  @Type(() => Date)
   cvaFecha?: Date;
 
   @IsString()

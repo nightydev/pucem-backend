@@ -4,18 +4,36 @@ import { Repository } from 'typeorm';
 import { NursingForm } from './entities/nursing-form.entity';
 import { CreateNursingFormDto } from './dto/create-nursing-form.dto';
 import { UpdateNursingFormDto } from './dto/update-nursing-form.dto';
+import { UsersService } from 'src/users/users.service';
+import { PatientsService } from 'src/patients/patients.service';
+import { User } from 'src/users/entities/user.entity';
+import { Patient } from 'src/patients/entities/patient.entity';
 
 @Injectable()
 export class NursingService {
   constructor(
     @InjectRepository(NursingForm)
     private readonly nursingFormRepository: Repository<NursingForm>,
-  ) {}
+    private readonly userService: UsersService,
+    private readonly patientsService: PatientsService
+  ) { }
 
   async create(
     createNursingFormDto: CreateNursingFormDto,
   ): Promise<NursingForm> {
-    const nursingForm = this.nursingFormRepository.create(createNursingFormDto);
+
+    const { userId, patientId, ...restForm } = createNursingFormDto;
+
+    const user: User = await this.userService.findOne(userId);
+    const patient: Patient = await this.patientsService.findOne(patientId);
+
+    const form = {
+      ...restForm,
+      user,
+      patient
+    };
+
+    const nursingForm = this.nursingFormRepository.create(form);
     return await this.nursingFormRepository.save(nursingForm);
   }
 

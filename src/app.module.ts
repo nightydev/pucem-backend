@@ -29,7 +29,7 @@ import { NursingModule } from './nursing/nursing.module';
       autoLoadEntities: true,
       synchronize: true,
       // TODO: Después de que Azure complete la actualización de certificados SSL intermedios (iniciada el 31 de enero de 2024),
-      // descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
+      //descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
       ssl: {
         rejectUnauthorized: false,
         ca: fs
@@ -53,4 +53,4 @@ import { NursingModule } from './nursing/nursing.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

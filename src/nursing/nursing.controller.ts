@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { NursingService } from './nursing.service';
 import { CreateNursingFormDto } from './dto/create-nursing-form.dto';
@@ -13,7 +14,7 @@ import { UpdateNursingFormDto } from './dto/update-nursing-form.dto';
 
 @Controller('nursing')
 export class NursingController {
-  constructor(private readonly nursingService: NursingService) {}
+  constructor(private readonly nursingService: NursingService) { }
 
   @Post()
   create(@Body() createNursingFormDto: CreateNursingFormDto) {
@@ -30,7 +31,7 @@ export class NursingController {
     return this.nursingService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateNursingFormDto: UpdateNursingFormDto,
