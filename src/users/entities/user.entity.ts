@@ -11,6 +11,7 @@ import { LaboratoryRequest } from 'src/laboratory-request/entities/laboratory-re
 import { ConsultationInitial } from 'src/consultation/entities/consultation-initial.entity';
 import { ConsultationSubsequent } from 'src/consultation/entities/consultation-subsequent.entity';
 import { ConsultationInternal } from 'src/internal/entities/consultation-internal.entity';
+import { NursingForm } from 'src/nursing/entities/nursing-form.entity';
 
 export enum Role {
   USER = 'user',
@@ -84,12 +85,24 @@ export class User {
   )
   laboratoryRequests: LaboratoryRequest[];
 
-  @OneToMany(() => ConsultationInitial, (consultationInitial) => consultationInitial.user)
+  @OneToMany(
+    () => ConsultationInitial,
+    (consultationInitial) => consultationInitial.user,
+  )
   consultationInitial: ConsultationInitial;
 
-  @OneToMany(() => ConsultationSubsequent, (consultationSubsequent) => consultationSubsequent.user)
+  @OneToMany(
+    () => ConsultationSubsequent,
+    (consultationSubsequent) => consultationSubsequent.user,
+  )
   consultationSubsequent: ConsultationSubsequent;
 
-  @OneToMany(() => ConsultationInternal, (consultationInternal) => consultationInternal.user)
+  @OneToMany(
+    () => ConsultationInternal,
+    (consultationInternal) => consultationInternal.user,
+  )
   consultationInternal: ConsultationInternal;
+
+  @OneToMany(() => NursingForm, (nursingForm) => nursingForm.user)
+  nursingForms: NursingForm[];
 }

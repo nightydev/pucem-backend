@@ -1,101 +1,49 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NursingForm } from './entities/nursing-form.entity';
 import { CreateNursingFormDto } from './dto/create-nursing-form.dto';
 import { UpdateNursingFormDto } from './dto/update-nursing-form.dto';
-import { NursingForm } from './interfaces/nursing-form.interface';
 
 @Injectable()
 export class NursingService {
-  private readonly logger = new Logger(NursingService.name);
-  private nursingForms: NursingForm[] = []; // Almacenamiento en memoria
+  constructor(
+    @InjectRepository(NursingForm)
+    private readonly nursingFormRepository: Repository<NursingForm>,
+  ) {}
 
-  create(createNursingFormDto: CreateNursingFormDto) {
-    const newForm: NursingForm = {
-      userId: createNursingFormDto.userId,
-      nombrePaciente: createNursingFormDto.nombrePaciente,
-      edadPaciente: createNursingFormDto.edadPaciente,
-      fechaValoracion: createNursingFormDto.fechaValoracion,
-      dominio: createNursingFormDto.dominio,
-      clase: createNursingFormDto.clase,
-      etiquetasDiagnosticas: createNursingFormDto.etiquetasDiagnosticas,
-      nocs: createNursingFormDto.nocs,
-      indicadoresNoc: createNursingFormDto.indicadoresNoc,
-      nics: createNursingFormDto.nics,
-      actividadesNic: createNursingFormDto.actividadesNic,
-    };
-
-    this.nursingForms.push(newForm); // Guardar en memoria
-    this.logger.log(`Formulario creado para el usuario: ${newForm.userId}`);
-    return { message: 'Formulario de enfermería creado exitosamente', newForm };
+  async create(
+    createNursingFormDto: CreateNursingFormDto,
+  ): Promise<NursingForm> {
+    const nursingForm = this.nursingFormRepository.create(createNursingFormDto);
+    return await this.nursingFormRepository.save(nursingForm);
   }
 
-  findAll() {
-    this.logger.log('Obteniendo todos los formularios de enfermería');
-    return this.nursingForms;
+  async findAll(): Promise<NursingForm[]> {
+    return await this.nursingFormRepository.find();
   }
 
-  findOne(userId: string) {
-    const form = this.nursingForms.find((form) => form.userId === userId);
-    if (!form) {
-      this.logger.error(`Formulario no encontrado para el usuario: ${userId}`);
-      throw new NotFoundException(
-        `Formulario de enfermería para el usuario con ID ${userId} no encontrado`,
-      );
+  async findOne(id: string): Promise<NursingForm> {
+    const nursingForm = await this.nursingFormRepository.findOne({
+      where: { id },
+    });
+    if (!nursingForm) {
+      throw new NotFoundException(`NursingForm with ID ${id} not found`);
     }
-    this.logger.log(`Formulario encontrado para el usuario: ${userId}`);
-    return form;
+    return nursingForm;
   }
 
-  update(userId: string, updateNursingFormDto: UpdateNursingFormDto) {
-    const formIndex = this.nursingForms.findIndex(
-      (form) => form.userId === userId,
-    );
-    if (formIndex === -1) {
-      this.logger.error(`Formulario no encontrado para el usuario: ${userId}`);
-      throw new NotFoundException(
-        `Formulario de enfermería para el usuario con ID ${userId} no encontrado`,
-      );
-    }
-
-    const updatedForm = {
-      ...this.nursingForms[formIndex],
-      ...updateNursingFormDto,
-    };
-    this.nursingForms[formIndex] = updatedForm;
-
-    this.logger.log(`Formulario actualizado para el usuario: ${userId}`);
-    return {
-      message: 'Formulario de enfermería actualizado exitosamente',
-      updatedForm,
-    };
+  async update(
+    id: string,
+    updateNursingFormDto: UpdateNursingFormDto,
+  ): Promise<NursingForm> {
+    const nursingForm = await this.findOne(id);
+    this.nursingFormRepository.merge(nursingForm, updateNursingFormDto);
+    return await this.nursingFormRepository.save(nursingForm);
   }
 
-  remove(userId: string) {
-    const formIndex = this.nursingForms.findIndex(
-      (form) => form.userId === userId,
-    );
-    if (formIndex === -1) {
-      this.logger.error(`Formulario no encontrado para el usuario: ${userId}`);
-      throw new NotFoundException(
-        `Formulario de enfermería para el usuario con ID ${userId} no encontrado`,
-      );
-    }
-
-    this.nursingForms.splice(formIndex, 1); // Eliminar el formulario
-    this.logger.log(`Formulario eliminado para el usuario: ${userId}`);
-    return { message: 'Formulario de enfermería eliminado exitosamente' };
-  }
-
-  findByDominio(dominio: string) {
-    const forms = this.nursingForms.filter((form) => form.dominio === dominio);
-    this.logger.log(`Formularios encontrados para el dominio: ${dominio}`);
-    return forms;
-  }
-
-  findByEtiqueta(etiqueta: string) {
-    const forms = this.nursingForms.filter((form) =>
-      form.etiquetasDiagnosticas.includes(etiqueta),
-    );
-    this.logger.log(`Formularios encontrados para la etiqueta: ${etiqueta}`);
-    return forms;
+  async remove(id: string): Promise<void> {
+    const nursingForm = await this.findOne(id);
+    await this.nursingFormRepository.remove(nursingForm);
   }
 }
