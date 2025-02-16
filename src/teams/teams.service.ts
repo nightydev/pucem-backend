@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,7 +25,7 @@ export class TeamsService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
-  ) { }
+  ) {}
 
   async create(createTeamDto: CreateTeamDto) {
     try {
@@ -53,7 +58,7 @@ export class TeamsService {
     const [teams, total] = await this.teamRepository.findAndCount({
       take: limit,
       skip: offset,
-      relations: ['patient', 'group']
+      relations: ['patient', 'group'],
     });
 
     return { teams, total };
@@ -68,13 +73,58 @@ export class TeamsService {
   }
 
   async update(id: string, updateTeamDto: UpdateTeamDto) {
-    emptyDtoException(updateTeamDto);
+    try {
+      emptyDtoException(updateTeamDto);
 
-    const team = await this.findOne(id);
-    const updatedTeam = { ...team, ...updateTeamDto };
+      const team = await this.findOne(id);
 
-    await this.teamRepository.save(updatedTeam);
-    return { message: 'Team updated successfully', updatedTeam };
+      if (updateTeamDto.groupId) {
+        const group = await this.groupRepository.findOne({
+          where: { id: updateTeamDto.groupId },
+        });
+        if (!group) {
+          throw new NotFoundException(
+            `Group with id ${updateTeamDto.groupId} not found`,
+          );
+        }
+        team.group = group;
+      }
+
+      if (updateTeamDto.patientId) {
+        const patient = await this.patientRepository.findOne({
+          where: { id: updateTeamDto.patientId },
+        });
+        if (!patient) {
+          throw new NotFoundException(
+            `Patient with id ${updateTeamDto.patientId} not found`,
+          );
+        }
+
+        // Check if patient already belongs to another team
+        const existingTeam = await this.teamRepository.findOne({
+          where: { patient: { id: updateTeamDto.patientId } },
+          relations: ['patient'],
+        });
+
+        if (existingTeam && existingTeam.id !== id) {
+          const errorMessage = `El paciente ya pertenece a otro equipo (${existingTeam.teamName}). Un paciente solo puede pertenecer a un equipo a la vez.`;
+          this.logger.error(errorMessage);
+          throw new BadRequestException(errorMessage);
+        }
+
+        team.patient = patient;
+      }
+
+      team.teamName = updateTeamDto.teamName;
+
+      await this.teamRepository.save(team);
+      return { message: 'Team updated successfully', team };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error; // Propagamos el error directamente si es un BadRequestException
+      }
+      handleDBExceptions(error, this.logger);
+    }
   }
 
   async remove(id: string) {
