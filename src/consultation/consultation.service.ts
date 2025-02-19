@@ -92,4 +92,25 @@ export class ConsultationService {
   remove(id: string) {
     return `This action removes a #${id} consultation`;
   }
+
+  async findAllByUser(userId: string) {
+    try {
+      const consultationsInitial = await this.consultationInitialRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient']
+      });
+
+      const consultationsSubsequent = await this.consultationSubsequentRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient', 'consultationInitial']
+      });
+
+      return {
+        initial: consultationsInitial,
+        subsequent: consultationsSubsequent
+      };
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
+  }
 }

@@ -7,10 +7,12 @@ import {
   Put,
   Delete,
   Patch,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { NursingService } from './nursing.service';
 import { CreateNursingFormDto } from './dto/create-nursing-form.dto';
 import { UpdateNursingFormDto } from './dto/update-nursing-form.dto';
+import { ApiOperation, ApiParam } from '@nestjs/swagger';
 
 @Controller('nursing')
 export class NursingController {
@@ -42,5 +44,12 @@ export class NursingController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.nursingService.remove(id);
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Obtener todos los formularios de enfermería de un usuario específico' })
+  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.nursingService.findAllByUser(userId);
   }
 }

@@ -3,6 +3,8 @@ import { ConsultationService } from './consultation.service';
 import { CreateConsultationInitialDto } from './dto/create-consultation-initial.dto';
 import { CreateConsultationSubsequentDto } from './dto/create-consultation-subsequent.dto';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { Role } from '../auth/entities/role.entity';
 
 @Controller('consultations')
 export class ConsultationController {
@@ -32,5 +34,12 @@ export class ConsultationController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.consultationService.remove(id);
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Obtener todas las consultas de un usuario específico' })
+  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.consultationService.findAllByUser(userId);
   }
 }

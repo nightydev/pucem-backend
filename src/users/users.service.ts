@@ -137,6 +137,7 @@ export class UsersService {
       newUser = {
         ...user,
         ...restUser,
+        team: newTeam,
       };
     }
 

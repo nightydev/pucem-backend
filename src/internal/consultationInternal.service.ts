@@ -78,4 +78,17 @@ export class ConsultationInternalService {
     await this.consultationInternalRepository.remove(consultation);
     return { message: `Consulta interna eliminada correctamente` };
   }
+
+  async findAllByUser(userId: string) {
+    try {
+      const consultations = await this.consultationInternalRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient']
+      });
+
+      return consultations;
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
+  }
 }
