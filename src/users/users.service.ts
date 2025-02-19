@@ -15,6 +15,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { emptyDtoException, handleDBExceptions } from 'src/common/utils';
+import { TeamsService } from 'src/teams/teams.service';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +25,8 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly careerService: CareersService,
-  ) {}
+    private readonly teamsService: TeamsService
+  ) { }
 
   async createUser(createUserDto: CreateUserDto) {
     try {
@@ -116,9 +118,11 @@ export class UsersService {
   async updateUser(updateUserDto: UpdateUserDto, id: string) {
     emptyDtoException(updateUserDto);
 
-    const { career, password, ...restUser } = updateUserDto;
+    const { career, password, team, ...restUser } = updateUserDto;
 
     const user = await this.findOne(id);
+
+    const newTeam = await this.teamsService.findOne(team);
 
     let newUser: any;
     if (career) {
@@ -127,6 +131,7 @@ export class UsersService {
         ...user,
         ...restUser,
         career: newCareer,
+        team: newTeam
       };
     } else {
       newUser = {

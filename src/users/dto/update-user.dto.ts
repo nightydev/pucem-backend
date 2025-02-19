@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsOptional, IsString, IsUUID, Length, MaxLength, MinLength } from "class-validator";
 
-export class UpdateUserDto { 
+export class UpdateUserDto {
 
   @ApiProperty({
     description: `User's identification document number`,
@@ -64,5 +64,13 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUUID()
   career?: string;
+
+  @ApiProperty({
+    description: `User's team ID`,
+    example: '135808f5-74b3-44c0-b774-0e627771d4fd'
+  })
+  @IsOptional()
+  @IsUUID()
+  team?: string;
 
 }
