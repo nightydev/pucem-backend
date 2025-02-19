@@ -17,7 +17,7 @@ export class PatientsService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Caregiver)
     private readonly caregiverRepository: Repository<Caregiver>,
-  ) {}
+  ) { }
 
   async create(createPatientDto: CreatePatientDto) {
     try {
@@ -46,13 +46,14 @@ export class PatientsService {
     const [patients, total] = await this.patientRepository.findAndCount({
       take: limit,
       skip: offset,
+      relations: ['caregiver']
     });
 
     return { patients, total };
   }
 
   async findOne(id: string) {
-    const patient = await this.patientRepository.findOne({ where: { id } });
+    const patient = await this.patientRepository.findOne({ where: { id }, relations: ['caregiver'] });
     if (!patient) {
       throw new NotFoundException(`Patient with id ${id} not found`);
     }
