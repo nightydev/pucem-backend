@@ -1,8 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateConsultationInitialDto {
-
   @ApiProperty({
     description: `Motivo de la consulta`,
     example: 'Dolor de cabeza',
@@ -24,6 +32,7 @@ export class CreateConsultationInitialDto {
     example: 'Historia de diabetes tipo 2 desde hace 5 años.',
   })
   @IsString()
+  @IsNotEmpty()
   antecedentesPatologicosPersonalesDesc: string;
 
   @ApiProperty({
@@ -39,6 +48,7 @@ export class CreateConsultationInitialDto {
     example: 'Madre con cáncer de mama y padre con insuficiencia renal.',
   })
   @IsString()
+  @IsNotEmpty()
   antecedentesPatologicosFamiliaresDesc: string;
 
   @ApiProperty({
@@ -53,148 +63,130 @@ export class CreateConsultationInitialDto {
     description: `Fecha del cuadro de valoración actual`,
     example: '2025-01-20T14:30:00.000Z',
   })
-  @IsOptional()
   @IsDateString()
-  cvaFecha?: string;
+  cvaFecha: string;
 
   @ApiProperty({
     description: `Hora del cuadro de valoración actual`,
     example: '14:30',
   })
-  @IsOptional()
   @IsString()
-  cvaHora?: string;
+  cvaHora: string;
 
   @ApiProperty({
     description: `Temperatura del paciente en el cuadro de valoración actual`,
     example: '37.5 °C',
   })
-  @IsOptional()
   @IsString()
-  cvaTemperatura?: string;
+  cvaTemperatura: string;
 
   @ApiProperty({
     description: `Presión arterial del paciente`,
     example: '120/80 mmHg',
   })
-  @IsOptional()
   @IsString()
-  cvaPresionArterial?: string;
+  cvaPresionArterial: string;
 
   @ApiProperty({
     description: `Pulso del paciente`,
     example: '75 bpm',
   })
-  @IsOptional()
   @IsString()
-  cvaPulso?: string;
+  cvaPulso: string;
 
   @ApiProperty({
     description: `Frecuencia respiratoria del paciente`,
     example: '18 rpm',
   })
-  @IsOptional()
   @IsString()
-  cvaFrecuenciaRespiratoria?: string;
+  cvaFrecuenciaRespiratoria: string;
 
   @ApiProperty({
     description: `Peso del paciente`,
     example: '70 kg',
   })
-  @IsOptional()
   @IsString()
-  cvaPeso?: string;
+  cvaPeso: string;
 
   @ApiProperty({
     description: `Talla del paciente`,
     example: '1.75 m',
   })
-  @IsOptional()
   @IsString()
-  cvaTalla?: string;
+  cvaTalla: string;
 
   @ApiProperty({
     description: `Índice de masa corporal del paciente`,
     example: '22.8',
   })
-  @IsOptional()
   @IsString()
-  cvaImc?: string;
+  cvaImc: string;
 
   @ApiProperty({
     description: `Perímetro abdominal del paciente`,
     example: '85 cm',
   })
-  @IsOptional()
   @IsString()
-  cvaPerimetroAbdominal?: string;
+  cvaPerimetroAbdominal: string;
 
   @ApiProperty({
     description: `Hemoglobina capilar del paciente`,
     example: '12.5 g/dL',
   })
-  @IsOptional()
   @IsString()
-  cvaHemoglobinaCapilar?: string;
+  cvaHemoglobinaCapilar: string;
 
   @ApiProperty({
     description: `Glucosa capilar del paciente`,
     example: '95 mg/dL',
   })
-  @IsOptional()
   @IsString()
-  cvaGlucosaCapilar?: string;
+  cvaGlucosaCapilar: string;
 
   @ApiProperty({
     description: `Pulsioximetría del paciente`,
     example: '98%',
   })
-  @IsOptional()
   @IsString()
-  cvaPulsioximetria?: string;
+  cvaPulsioximetria: string;
 
   @ApiProperty({
     description: `Patologías relacionadas con órganos o sistemas`,
     example: ['Sistema digestivo', 'Sistema respiratorio'],
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  organosSistemasPatologia?: string[];
+  organosSistemasPatologia: string[];
 
   @ApiProperty({
     description: `Descripciones relacionadas con órganos o sistemas`,
     example: ['Gastritis crónica', 'Asma leve'],
     required: false,
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  organosSistemasPatologiaDesc?: string[];
+  organosSistemasPatologiaDesc: string[];
 
   @ApiProperty({
     description: `Patologías identificadas en el examen físico`,
     example: ['Hipertensión', 'Obesidad'],
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  examenFisicoPatologia?: string[];
+  examenFisicoPatologia: string[];
 
   @ApiProperty({
     description: `Descripciones de patologías identificadas en el examen físico`,
     example: ['Presión arterial alta durante consulta', 'IMC mayor a 30'],
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  examenFisicoPatologiaDesc?: string[];
+  examenFisicoPatologiaDesc: string[];
 
   @ApiProperty({
     description: `Descripciones de los diagnósticos`,
     example: ['Hipertensión esencial', 'Diabetes tipo 2 controlada'],
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   diagnosticosDesc: string[];
@@ -203,7 +195,6 @@ export class CreateConsultationInitialDto {
     description: `Códigos CIE de los diagnósticos`,
     example: ['I10', 'E11.9'],
   })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   diagnosticosCie: string[];
@@ -230,4 +221,216 @@ export class CreateConsultationInitialDto {
   @IsUUID()
   patient: string;
 
+  @ApiProperty({
+    description: `Institución del sistema`,
+    example: 'Hospital General de la ciudad',
+  })
+  @IsString()
+  @IsNotEmpty()
+  institucionSistema: string;
+
+  @ApiProperty({
+    description: `Código único`,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  unicodigo: string;
+
+  @ApiProperty({
+    description: `Establecimiento de salud`,
+    example: 'Hospital General de la ciudad',
+  })
+  @IsString()
+  @IsNotEmpty()
+  establecimientoSalud: string;
+
+  @ApiProperty({
+    description: `Número de historia clínica`,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  numeroHistoriaClinica: string;
+
+  @ApiProperty({
+    description: `Número de archivo`,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  numeroArchivo: string;
+
+  @ApiProperty({
+    description: `Número de hoja`,
+    example: '123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  numeroHoja: string;
+
+  @ApiProperty({
+    description: `Primer apellido`,
+    example: 'González',
+  })
+  @IsString()
+  @IsNotEmpty()
+  primerApellido: string;
+
+  @ApiProperty({
+    description: `Segundo apellido`,
+    example: 'Pérez',
+  })
+  @IsOptional()
+  @IsString()
+  segundoApellido?: string;
+
+  @ApiProperty({
+    description: `Primer nombre`,
+    example: 'Juan',
+  })
+  @IsString()
+  @IsNotEmpty()
+  primerNombre: string;
+
+  @ApiProperty({
+    description: `Segundo nombre`,
+    example: 'Carlos',
+  })
+  @IsOptional()
+  @IsString()
+  segundoNombre?: string;
+
+  @ApiProperty({
+    description: `Sexo`,
+    example: 'Masculino',
+  })
+  @IsString()
+  @IsNotEmpty()
+  sexo: string;
+
+  @ApiProperty({
+    description: `Edad`,
+    example: 30,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  edad: number;
+
+  @ApiProperty({
+    description: `Motivo de la consulta primera`,
+    example: 'Dolor de cabeza',
+  })
+  @IsString()
+  @IsNotEmpty()
+  motivoConsultaPrimera: string;
+
+  @ApiProperty({
+    description: `Motivo de la consulta subsecuente`,
+    example: 'Dolor de cabeza',
+  })
+  @IsOptional()
+  @IsString()
+  motivoConsultaSubsecuente?: string;
+
+  @ApiProperty({
+    description: `Antecedentes personales`,
+    example: {
+      cardiopatia: true,
+      hipertension: true,
+      ebyec: true,
+      problemaMetabolico: true,
+      cancer: true,
+      tuberculosis: true,
+      enfMental: true,
+      enfInfecciosa: true,
+      malformacion: true,
+      otro: 'Historia de enfermedad',
+    },
+  })
+  @IsObject()
+  antecedentesPersonales: {
+    cardiopatia: boolean;
+    hipertension: boolean;
+    ebyec: boolean;
+    problemaMetabolico: boolean;
+    cancer: boolean;
+    tuberculosis: boolean;
+    enfMental: boolean;
+    enfInfecciosa: boolean;
+    malformacion: boolean;
+    otro?: string;
+  };
+
+  @ApiProperty({
+    description: `Antecedentes familiares`,
+    example: {
+      cardiopatia: true,
+      hipertension: true,
+      ebyec: true,
+      problemaMetabolico: true,
+      cancer: true,
+      tuberculosis: true,
+      enfMental: true,
+      enfInfecciosa: true,
+      malformacion: true,
+      otro: 'Historia de enfermedad',
+    },
+  })
+  @IsObject()
+  antecedentesFamiliares: {
+    cardiopatia: boolean;
+    hipertension: boolean;
+    ebyec: boolean;
+    problemaMetabolico: boolean;
+    cancer: boolean;
+    tuberculosis: boolean;
+    enfMental: boolean;
+    enfInfecciosa: boolean;
+    malformacion: boolean;
+    otro?: string;
+  };
+
+  @ApiProperty({
+    description: `Enfermedad actual`,
+    example: 'Hipertensión',
+  })
+  @IsString()
+  @IsNotEmpty()
+  enfermedadActual: string;
+
+  @ApiProperty({
+    description: `Constantes vitales`,
+    example: {
+      fecha: '2025-01-20T14:30:00.000Z',
+      hora: '14:30',
+      temperatura: 37.5,
+      presionArterial: '120/80 mmHg',
+      frecuenciaCardiaca: 75,
+      frecuenciaRespiratoria: 18,
+      peso: 70,
+      talla: 1.75,
+      imc: 22.8,
+      perimetroAbdominal: 85,
+      hemoglobinaCapilar: 12.5,
+      glucosaCapilar: 95,
+      pulsioximetria: 98,
+    },
+  })
+  @IsObject()
+  constantesVitales: {
+    fecha: string;
+    hora: string;
+    temperatura: number;
+    presionArterial: string;
+    frecuenciaCardiaca: number;
+    frecuenciaRespiratoria: number;
+    peso: number;
+    talla: number;
+    imc: number;
+    perimetroAbdominal: number;
+    hemoglobinaCapilar: number;
+    glucosaCapilar: number;
+    pulsioximetria: number;
+  };
 }

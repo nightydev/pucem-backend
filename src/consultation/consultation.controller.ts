@@ -6,23 +6,46 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ConsultationService } from './consultation.service';
 import { CreateConsultationInitialDto } from './dto/create-consultation-initial.dto';
 import { CreateConsultationSubsequentDto } from './dto/create-consultation-subsequent.dto';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+// Extender la interfaz Request para incluir el usuario
+interface RequestWithUser extends Request {
+  user?: {
+    id: string;
+    // ... otros campos del usuario si los hay
+  };
+}
 
 @Controller('consultations')
+@UseGuards(JwtAuthGuard)
 export class ConsultationController {
   constructor(private readonly consultationService: ConsultationService) {}
 
   @Post('initial')
   @ApiOperation({ summary: 'Create a consultation initial' })
   @ApiBody({ type: CreateConsultationInitialDto })
-  createInitial(
+  create(
     @Body() createConsultationInitialDto: CreateConsultationInitialDto,
+    @Req() request: RequestWithUser,
   ) {
-    return this.consultationService.createInitial(createConsultationInitialDto);
+    // Obtener el userId del token
+    const userId = request.user?.id;
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    return this.consultationService.createInitial(
+      createConsultationInitialDto,
+      userId,
+    );
   }
 
   @Post('subsequent')

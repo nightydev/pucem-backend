@@ -23,25 +23,33 @@ export class ConsultationService {
     private readonly patientsService: PatientsService
   ) { }
 
-  async createInitial(createConsultationInitialDto: CreateConsultationInitialDto) {
+  async createInitial(createConsultationInitialDto: CreateConsultationInitialDto, userId: string) {
     try {
-      const { user, patient, ...rest } = createConsultationInitialDto;
+      const { patient: patientId, ...consultationData } = createConsultationInitialDto;
 
-      const userExists = await this.usersService.findOne(user);
-      const patientExists = await this.patientsService.findOne(patient);
+      // Buscar el paciente
+      const patient = await this.patientsService.findOne(patientId);
+      
+      // Buscar el usuario usando el ID del token
+      const user = await this.usersService.findOne(userId);
 
+      // Crear la consulta
       const consultation = this.consultationInitialRepository.create({
-        ...rest,
-        user: userExists,
-        patient: patientExists,
+        ...consultationData,
+        user,
+        patient,
         fecha: new Date()
       });
+
       await this.consultationInitialRepository.save(consultation);
 
-      return { message: `Consultation created successfully`, consultation };
-
+      return { 
+        message: 'Consulta creada exitosamente',
+        consultation 
+      };
     } catch (error) {
-      handleDBExceptions(error, this.logger);
+      console.error('Error al crear consulta:', error);
+      throw error;
     }
   }
 
