@@ -29,7 +29,7 @@ export class AuthService {
         lastName: true,
         role: true,
       },
-      relations: ['team'],
+      relations: ['team', 'team.patient', 'team.patient.caregiver'],
     });
 
     if (!user) {
@@ -50,7 +50,14 @@ export class AuthService {
       name: user.name,
       lastName: user.lastName,
       role: user.role,
-      team: user.team,
+      team: user.team ? {
+        id: user.team.id,
+        teamName: user.team.teamName,
+        patient: user.team.patient ? {
+          ...user.team.patient,
+          caregiver: user.team.patient.caregiver
+        } : null
+      } : null,
       token: this.getJwtToken({ id: user.id }),
     };
   }

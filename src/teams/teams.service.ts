@@ -64,8 +64,11 @@ export class TeamsService {
     return { teams, total };
   }
 
-  async findOne(id: string) {
-    const team = await this.teamRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<Team> {
+    const team = await this.teamRepository.findOne({
+      where: { id },
+      relations: ['patient'],
+    });
     if (!team) {
       throw new NotFoundException(`Team with id ${id} not found`);
     }
