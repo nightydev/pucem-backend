@@ -48,5 +48,12 @@ import {
     remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.consultationInternalService.remove(id);
     }
+  
+    @Get('user/:userId')
+    @ApiOperation({ summary: 'Obtener todas las consultas internas de un usuario específico' })
+    @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+    findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+      return this.consultationInternalService.findAllByUser(userId);
+    }
   }
   

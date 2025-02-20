@@ -98,4 +98,12 @@ export class LaboratoryRequestController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.laboratoryRequestService.remove(id);
   }
+
+  @Get('user/:userId')
+  @Auth(Role.USER)
+  @ApiOperation({ summary: 'Obtener todas las solicitudes de laboratorio de un usuario específico' })
+  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.laboratoryRequestService.findAllByUser(userId);
+  }
 }

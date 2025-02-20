@@ -64,4 +64,17 @@ export class NursingService {
     const nursingForm = await this.findOne(id);
     await this.nursingFormRepository.remove(nursingForm);
   }
+
+  async findAllByUser(userId: string) {
+    try {
+      const forms = await this.nursingFormRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient']
+      });
+
+      return forms;
+    } catch (error) {
+      throw new NotFoundException(`No se encontraron formularios para el usuario con ID ${userId}`);
+    }
+  }
 }

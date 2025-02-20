@@ -126,4 +126,17 @@ export class LaboratoryRequestService {
     await this.laboratoryRequestRepository.remove(request);
     return { message: `Laboratory request with ID ${id} deleted successfully` };
   }
+
+  async findAllByUser(userId: string) {
+    try {
+      const requests = await this.laboratoryRequestRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient', 'microbiologia']
+      });
+
+      return requests;
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
+  }
 }
