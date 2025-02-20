@@ -21,20 +21,36 @@ export class NursingService {
   async create(
     createNursingFormDto: CreateNursingFormDto,
   ): Promise<NursingForm> {
+    try {
+      const { userId, patientId, ...restForm } = createNursingFormDto;
 
-    const { userId, patientId, ...restForm } = createNursingFormDto;
+      // Verificar que el usuario existe
+      const user: User = await this.userService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+      }
 
-    const user: User = await this.userService.findOne(userId);
-    const patient: Patient = await this.patientsService.findOne(patientId);
+      // Verificar que el paciente existe
+      const patient: Patient = await this.patientsService.findOne(patientId);
+      if (!patient) {
+        throw new NotFoundException(`Paciente con ID ${patientId} no encontrado`);
+      }
 
-    const form = {
-      ...restForm,
-      user,
-      patient
-    };
+      // Crear el formulario con las relaciones
+      const nursingForm = this.nursingFormRepository.create({
+        ...restForm,
+        user,
+        patient
+      });
 
-    const nursingForm = this.nursingFormRepository.create(form);
-    return await this.nursingFormRepository.save(nursingForm);
+      // Guardar y retornar el formulario
+      return await this.nursingFormRepository.save(nursingForm);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Error al crear el formulario de enfermería: ${error.message}`);
+    }
   }
 
   async findAll(): Promise<NursingForm[]> {

@@ -1,92 +1,94 @@
-import { IsString, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsArray, IsNotEmpty, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateNursingFormDto {
-  @ApiProperty({ description: 'Dominio NANDA relacionado', required: false })
+  @ApiProperty({ description: 'Dominio NANDA relacionado' })
   @IsString()
-  @IsOptional()
-  nanda_dominio?: string;
+  @IsNotEmpty()
+  nanda_dominio: string;
 
-  @ApiProperty({ description: 'Clase NANDA relacionada', required: false })
+  @ApiProperty({ description: 'Clase NANDA relacionada' })
   @IsString()
-  @IsOptional()
-  nanda_clase?: string;
+  @IsNotEmpty()
+  nanda_clase: string;
 
-  @ApiProperty({ description: 'Etiqueta diagnóstica NANDA relacionada', required: false })
+  @ApiProperty({ description: 'Etiqueta diagnóstica NANDA relacionada' })
   @IsString()
-  @IsOptional()
-  nanda_etiqueta_diagnostica?: string;
+  @IsNotEmpty()
+  nanda_etiqueta_diagnostica: string;
 
-  @ApiProperty({ description: 'Factor relacionado con NANDA', required: false })
+  @ApiProperty({ description: 'Factor relacionado con NANDA' })
   @IsString()
-  @IsOptional()
-  nanda_factor_relacionado?: string;
+  @IsNotEmpty()
+  nanda_factor_relacionado: string;
 
-  @ApiProperty({ description: 'Planteamiento del diagnóstico NANDA', required: false })
+  @ApiProperty({ description: 'Planteamiento del diagnóstico NANDA' })
   @IsString()
-  @IsOptional()
-  nanda_planteamiento_del_diagnostico?: string;
+  @IsNotEmpty()
+  nanda_planteamiento_del_diagnostico: string;
 
-  @ApiProperty({ description: 'Resultado NOC', required: false })
+  @ApiProperty({ description: 'Resultado NOC' })
   @IsString()
-  @IsOptional()
-  noc_resultado_noc?: string;
+  @IsNotEmpty()
+  noc_resultado_noc: string;
 
-  @ApiProperty({ description: 'Dominio NOC relacionado', required: false })
+  @ApiProperty({ description: 'Dominio NOC relacionado' })
   @IsString()
-  @IsOptional()
-  noc_dominio?: string;
+  @IsNotEmpty()
+  noc_dominio: string;
 
-  @ApiProperty({ description: 'Clase NOC relacionada', required: false })
+  @ApiProperty({ description: 'Clase NOC relacionada' })
   @IsString()
-  @IsOptional()
-  noc_clase?: string;
+  @IsNotEmpty()
+  noc_clase: string;
 
-  @ApiProperty({ type: [String], description: 'Indicadores NOC', required: false })
+  @ApiProperty({ type: [String], description: 'Indicadores NOC' })
   @IsArray()
-  @IsOptional()
-  noc_indicador?: string[];
+  @IsNotEmpty()
+  noc_indicador: string[];
 
-  @ApiProperty({ type: [String], description: 'Rangos NOC', required: false })
+  @ApiProperty({ type: [String], description: 'Rangos NOC' })
   @IsArray()
-  @IsOptional()
-  noc_rango?: string[];
+  @IsNotEmpty()
+  noc_rango: string[];
 
-  @ApiProperty({ type: [String], description: 'Diana inicial NOC', required: false })
+  @ApiProperty({ type: [String], description: 'Diana inicial NOC' })
   @IsArray()
-  @IsOptional()
-  noc_diana_inicial?: string[];
+  @IsNotEmpty()
+  noc_diana_inicial: string[];
 
-  @ApiProperty({ type: [String], description: 'Diana esperada NOC', required: false })
+  @ApiProperty({ type: [String], description: 'Diana esperada NOC' })
   @IsArray()
-  @IsOptional()
-  noc_diana_esperada?: string[];
+  @IsNotEmpty()
+  noc_diana_esperada: string[];
 
-  @ApiProperty({ type: [String], description: 'Evaluación NOC', required: false })
+  @ApiProperty({ type: [String], description: 'Evaluación NOC' })
   @IsArray()
-  @IsOptional()
-  noc_evaluacion?: string[];
+  @IsNotEmpty()
+  noc_evaluacion: string[];
 
-  @ApiProperty({ type: [String], description: 'Intervenciones NIC', required: false })
+  @ApiProperty({ type: [String], description: 'Intervenciones NIC' })
   @IsArray()
-  @IsOptional()
-  nic_intervencion?: string[];
+  @IsNotEmpty()
+  nic_intervencion: string[];
 
-  @ApiProperty({ type: [String], description: 'Clase NIC', required: false })
+  @ApiProperty({ type: [String], description: 'Clase NIC' })
   @IsArray()
-  @IsOptional()
-  nic_clase?: string[];
+  @IsNotEmpty()
+  nic_clase: string[];
 
-  @ApiProperty({ type: [String], description: 'Actividades NIC', required: false })
+  @ApiProperty({ type: [String], description: 'Actividades NIC' })
   @IsArray()
-  @IsOptional()
-  nic_actividades?: string[];
+  @IsNotEmpty()
+  nic_actividades: string[];
 
   @ApiProperty({ description: 'ID del usuario que crea el formulario' })
-  @IsString()
+  @IsUUID()
+  @IsNotEmpty()
   userId: string;
 
   @ApiProperty({ description: 'ID del paciente relacionado con el formulario' })
-  @IsString()
+  @IsUUID()
+  @IsNotEmpty()
   patientId: string;
 }
