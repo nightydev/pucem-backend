@@ -35,14 +35,15 @@ export class CaregiversService {
 
     const caregivers = await this.caregiverRepository.find({
       take: limit,
-      skip: offset
+      skip: offset,
+      relations: ['patients']
     });
 
     return caregivers;
   }
 
   async findOne(id: string) {
-    const caregiver = await this.caregiverRepository.findOne({ where: { id } });
+    const caregiver = await this.caregiverRepository.findOne({ where: { id }, relations: ['patients'] });
     if (!caregiver) {
       throw new NotFoundException(`Caregiver with id ${id} not found`);
     }
@@ -57,7 +58,7 @@ export class CaregiversService {
     const newCaregiver = {
       ...caregiver,
       ...updateCaregiverDto
-    }
+    };
 
     await this.caregiverRepository.save(newCaregiver);
 

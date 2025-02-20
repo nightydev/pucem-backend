@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,15 +12,24 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService
-  ) { }
+    private readonly jwtService: JwtService,
+  ) {}
 
   async loginUser(loginUserDto: LoginUserDto) {
     const { password, document } = loginUserDto;
 
     const user = await this.userRepository.findOne({
       where: { document },
-      select: { document: true, password: true, id: true, isActive: true, name: true, lastName: true, role: true }
+      select: {
+        document: true,
+        password: true,
+        id: true,
+        isActive: true,
+        name: true,
+        lastName: true,
+        role: true,
+      },
+      relations: ['team'],
     });
 
     if (!user) {
@@ -40,7 +49,8 @@ export class AuthService {
       name: user.name,
       lastName: user.lastName,
       role: user.role,
-      token: this.getJwtToken({ id: user.id })
+      team: user.team,
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 
@@ -48,5 +58,4 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
     return token;
   }
-
 }

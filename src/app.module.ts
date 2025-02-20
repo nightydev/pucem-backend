@@ -11,6 +11,10 @@ import { GroupsModule } from './groups/groups.module';
 import { PatientsModule } from './patients/patients.module';
 import { CaregiversModule } from './caregivers/caregivers.module';
 import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
+import { LaboratoryRequestModule } from './laboratory-request/laboratory-request.module';
+import { ConsultationModule } from './consultation/consultation.module';
+import { ConsultationInternalModule } from './internal/consultationInternal.module';
+import { NursingModule } from './nursing/nursing.module';
 
 @Module({
   imports: [
@@ -24,8 +28,10 @@ import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      // TODO: Después de que Azure complete la actualización de certificados SSL intermedios (iniciada el 31 de enero de 2024),
+      //descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
       ssl: {
-        rejectUnauthorized: true,
+        rejectUnauthorized: false,
         ca: fs
           .readFileSync(path.join(__dirname, '../', process.env.DB_SSL_FILE))
           .toString(),
@@ -39,8 +45,12 @@ import { SnakeNamingStrategy } from './common/config/snake-naming.strategy';
     GroupsModule,
     PatientsModule,
     CaregiversModule,
+    LaboratoryRequestModule,
+    ConsultationModule,
+    ConsultationInternalModule,
+    NursingModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

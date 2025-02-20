@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CareersModule } from 'src/careers/careers.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { TeamsModule } from 'src/teams/teams.module';
 
 @Module({
   controllers: [UsersController],
@@ -12,8 +13,9 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [
     TypeOrmModule.forFeature([User]),
     CareersModule,
-    AuthModule
+    AuthModule,
+    TeamsModule
   ],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, UsersService]
 })
-export class UsersModule {}
+export class UsersModule { }
