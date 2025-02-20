@@ -1,116 +1,92 @@
-import { Type } from 'class-transformer';
-import { IsDate, IsString, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsArray, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateNursingFormDto {
-  @IsDate()
-  @Type(() => Date)
-  fecha: Date;
-
+  @ApiProperty({ description: 'Dominio NANDA relacionado', required: false })
   @IsString()
-  motivoConsulta: string;
+  @IsOptional()
+  nanda_dominio?: string;
 
+  @ApiProperty({ description: 'Clase NANDA relacionada', required: false })
+  @IsString()
+  @IsOptional()
+  nanda_clase?: string;
+
+  @ApiProperty({ description: 'Etiqueta diagnóstica NANDA relacionada', required: false })
+  @IsString()
+  @IsOptional()
+  nanda_etiqueta_diagnostica?: string;
+
+  @ApiProperty({ description: 'Factor relacionado con NANDA', required: false })
+  @IsString()
+  @IsOptional()
+  nanda_factor_relacionado?: string;
+
+  @ApiProperty({ description: 'Planteamiento del diagnóstico NANDA', required: false })
+  @IsString()
+  @IsOptional()
+  nanda_planteamiento_del_diagnostico?: string;
+
+  @ApiProperty({ description: 'Resultado NOC', required: false })
+  @IsString()
+  @IsOptional()
+  noc_resultado_noc?: string;
+
+  @ApiProperty({ description: 'Dominio NOC relacionado', required: false })
+  @IsString()
+  @IsOptional()
+  noc_dominio?: string;
+
+  @ApiProperty({ description: 'Clase NOC relacionada', required: false })
+  @IsString()
+  @IsOptional()
+  noc_clase?: string;
+
+  @ApiProperty({ type: [String], description: 'Indicadores NOC', required: false })
   @IsArray()
   @IsOptional()
-  antecedentesPatologicosPersonales?: string[];
+  noc_indicador?: string[];
 
-  @IsString()
-  @IsOptional()
-  antecedentesPatologicosPersonalesDesc?: string;
-
+  @ApiProperty({ type: [String], description: 'Rangos NOC', required: false })
   @IsArray()
   @IsOptional()
-  antecedentesPatologicosFamiliares?: string[];
+  noc_rango?: string[];
 
-  @IsString()
-  @IsOptional()
-  antecedentesPatologicosFamiliaresDesc?: string;
-
-  @IsString()
-  enfermedadProblemaActual: string;
-
-  @IsDate()
-  @IsOptional()
-  @Type(() => Date)
-  cvaFecha?: Date;
-
-  @IsString()
-  @IsOptional()
-  cvaHora?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaTemperatura?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaPresionArterial?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaPulso?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaFrecuenciaRespiratoria?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaPeso?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaTalla?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaImc?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaPerimetroAbdominal?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaHemoglobinaCapilar?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaGlucosaCapilar?: string;
-
-  @IsString()
-  @IsOptional()
-  cvaPulsioximetria?: string;
-
+  @ApiProperty({ type: [String], description: 'Diana inicial NOC', required: false })
   @IsArray()
   @IsOptional()
-  organosSistemasPatologia?: string[];
+  noc_diana_inicial?: string[];
 
+  @ApiProperty({ type: [String], description: 'Diana esperada NOC', required: false })
   @IsArray()
   @IsOptional()
-  organosSistemasPatologiaDesc?: string[];
+  noc_diana_esperada?: string[];
 
+  @ApiProperty({ type: [String], description: 'Evaluación NOC', required: false })
   @IsArray()
   @IsOptional()
-  examenFisicoPatologia?: string[];
+  noc_evaluacion?: string[];
 
+  @ApiProperty({ type: [String], description: 'Intervenciones NIC', required: false })
   @IsArray()
   @IsOptional()
-  examenFisicoPatologiaDesc?: string[];
+  nic_intervencion?: string[];
 
+  @ApiProperty({ type: [String], description: 'Clase NIC', required: false })
   @IsArray()
   @IsOptional()
-  diagnosticosDesc?: string[];
+  nic_clase?: string[];
 
+  @ApiProperty({ type: [String], description: 'Actividades NIC', required: false })
   @IsArray()
   @IsOptional()
-  diagnosticosCie?: string[];
+  nic_actividades?: string[];
 
-  @IsString()
-  planTratamiento: string;
-
+  @ApiProperty({ description: 'ID del usuario que crea el formulario' })
   @IsString()
   userId: string;
 
+  @ApiProperty({ description: 'ID del paciente relacionado con el formulario' })
   @IsString()
   patientId: string;
 }
