@@ -38,20 +38,40 @@ export class TeamsService {
       }
   
       // Buscar todos los pacientes con los IDs proporcionados
-      const patients = await this.patientRepository.findByIds(patientIds);
-      if (patients.length !== patientIds.length) {
-        throw new NotFoundException(`Some patients were not found`);
+      const patient = await this.patientRepository.findByIds(patientIds);
+      if (patient.length !== patientIds.length) {
+        throw new NotFoundException(`Some patient were not found`);
+      }
+      
+      // Verificar si algún paciente ya pertenece a otro equipo
+      const patientWithTeam = patient.filter(patient => patient.team);
+      if (patientWithTeam.length > 0) {
+        const patientNames = patientWithTeam.map(p => p.name).join(', ');
+        throw new BadRequestException(`These patient already belong to a team: ${patientNames}`);
       }
   
-      // Crear el equipo con múltiples pacientes
+      // Crear el equipo primero sin pacientes
       const team = this.teamRepository.create({
         teamName,
         group,
-        patient: patients, // Ahora asigna múltiples pacientes
       });
-  
-      await this.teamRepository.save(team);
-      return { message: 'Team created successfully', team };
+      
+      // Guardar el equipo para obtener su ID
+      const savedTeam = await this.teamRepository.save(team);
+      
+      // Actualizar cada paciente para asignarle el equipo
+      for (const p of patient) {
+        p.team = savedTeam;
+        await this.patientRepository.save(p);
+      }
+      
+      // Obtener el equipo actualizado con sus pacientes
+      const updatedTeam = await this.teamRepository.findOne({
+        where: { id: savedTeam.id },
+        relations: ['patient', 'group'],
+      });
+      
+      return { message: 'Team created successfully', team: updatedTeam };
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
@@ -60,25 +80,43 @@ export class TeamsService {
   async findAll(paginationDto: PaginationDto) {
     const { limit = 10, page = 1 } = paginationDto;
     const offset = (page - 1) * limit;
-
+  
     const [teams, total] = await this.teamRepository.findAndCount({
       take: limit,
       skip: offset,
-      relations: ['patient', 'group'],
+      relations: ['patient', 'group', 'user'],  // ✅ Agregamos 'user' para contar gestores
     });
-
-    return { teams, total };
+    
+    // Agregar `patientCount` y `userCount`
+    const teamsWithCounts = teams.map((team) => ({
+      ...team,
+      patientCount: team.patient.length,  // ✅ Cuenta pacientes
+      userCount: team.user.length,        // ✅ Cuenta gestores
+    }));
+    
+    return { teams: teamsWithCounts, total };
+    
   }
+  
 
   async findOne(id: string): Promise<Team> {
     const team = await this.teamRepository.findOne({
       where: { id },
-      relations: ['patient'],
+      relations: ['patient', 'group', 'user'],  // ✅ Incluimos `user`
     });
+    
     if (!team) {
       throw new NotFoundException(`Team with id ${id} not found`);
     }
-    return team;
+    
+    const formattedTeam = {
+      ...team,
+      patient: Array.isArray(team.patient) ? team.patient : [],
+      userCount: team.user.length,  // ✅ Contamos los gestores
+    };
+    
+    return formattedTeam;
+    
   }
 
   async update(id: string, updateTeamDto: UpdateTeamDto) {
@@ -95,36 +133,55 @@ export class TeamsService {
         team.group = group;
       }
   
-      if (updateTeamDto.patientIds) {
-        const patients = await this.patientRepository.findByIds(updateTeamDto.patientIds);
-        if (!patients.length) {
+      if (updateTeamDto.patientIds && updateTeamDto.patientIds.length > 0) {
+        const newPatients = await this.patientRepository.findByIds(updateTeamDto.patientIds);
+      
+        if (!newPatients.length) {
           throw new NotFoundException(`No patients found for provided IDs`);
         }
-  
-        // Filtrar pacientes que ya pertenecen a otro equipo
-        const existingPatients = patients.filter(patient => patient.team && patient.team.id !== id);
-        if (existingPatients.length) {
-          const patientNames = existingPatients.map(p => p.name).join(', ');
-          throw new BadRequestException(`Some patients already belong to other teams: ${patientNames}`);
+      
+        // Verificar si algún paciente ya pertenece a otro equipo
+        const patientsWithTeam = newPatients.filter(patient => patient.team && patient.team.id !== id);
+        if (patientsWithTeam.length > 0) {
+          const patientNames = patientsWithTeam.map(p => p.name).join(', ');
+          throw new BadRequestException(`These patients already belong to other teams: ${patientNames}`);
         }
-  
-        team.patient = patients; // Asignar los nuevos pacientes
+      
+        // Asignar el equipo a los nuevos pacientes
+        for (const patient of newPatients) {
+          patient.team = team;
+          await this.patientRepository.save(patient);
+        }
       }
+      
   
       if (updateTeamDto.teamName) {
         team.teamName = updateTeamDto.teamName;
       }
   
       await this.teamRepository.save(team);
-      return { message: 'Team updated successfully', team };
+      
+      // Obtener el equipo actualizado con sus relaciones
+      const updatedTeam = await this.findOne(id);
+      return { message: 'Team updated successfully', team: updatedTeam };
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
   }
   
-
   async remove(id: string) {
     const team = await this.findOne(id);
+    
+    // Desasociar a todos los pacientes del equipo
+    const patient = await this.patientRepository.find({
+      where: { team: { id } },
+    });
+    
+    for (const p of patient) {
+      p.team = null;
+      await this.patientRepository.save(p);
+    }
+    
     await this.teamRepository.remove(team);
     return { message: `Team with ID ${id} deleted successfully` };
   }
