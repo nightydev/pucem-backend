@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID, IsArray  } from 'class-validator';
 
 export class CreateTeamDto {
   @ApiProperty({
@@ -20,6 +20,7 @@ export class CreateTeamDto {
     description: `Patient ID`,
     example: 'uuid-of-patient',
   })
-  @IsUUID()
-  patientId: string;
+  @IsArray()
+  @IsUUID('4', { each: true })
+  patientIds: string[];
 }

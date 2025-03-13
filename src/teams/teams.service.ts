@@ -29,21 +29,27 @@ export class TeamsService {
 
   async create(createTeamDto: CreateTeamDto) {
     try {
-      const { patientId, groupId, teamName } = createTeamDto;
-
-      const patient = await this.patientRepository.findOne({
-        where: { id: patientId },
-      });
-      const group = await this.groupRepository.findOne({
-        where: { id: groupId },
-      });
-
+      const { patientIds, groupId, teamName } = createTeamDto;
+  
+      // Verificar que el grupo exista
+      const group = await this.groupRepository.findOne({ where: { id: groupId } });
+      if (!group) {
+        throw new NotFoundException(`Group with ID ${groupId} not found`);
+      }
+  
+      // Buscar todos los pacientes con los IDs proporcionados
+      const patients = await this.patientRepository.findByIds(patientIds);
+      if (patients.length !== patientIds.length) {
+        throw new NotFoundException(`Some patients were not found`);
+      }
+  
+      // Crear el equipo con múltiples pacientes
       const team = this.teamRepository.create({
         teamName,
-        patient,
         group,
+        patient: patients, // Ahora asigna múltiples pacientes
       });
-
+  
       await this.teamRepository.save(team);
       return { message: 'Team created successfully', team };
     } catch (error) {
@@ -78,57 +84,44 @@ export class TeamsService {
   async update(id: string, updateTeamDto: UpdateTeamDto) {
     try {
       emptyDtoException(updateTeamDto);
-
+  
       const team = await this.findOne(id);
-
+  
       if (updateTeamDto.groupId) {
-        const group = await this.groupRepository.findOne({
-          where: { id: updateTeamDto.groupId },
-        });
+        const group = await this.groupRepository.findOne({ where: { id: updateTeamDto.groupId } });
         if (!group) {
-          throw new NotFoundException(
-            `Group with id ${updateTeamDto.groupId} not found`,
-          );
+          throw new NotFoundException(`Group with ID ${updateTeamDto.groupId} not found`);
         }
         team.group = group;
       }
-
-      if (updateTeamDto.patientId) {
-        const patient = await this.patientRepository.findOne({
-          where: { id: updateTeamDto.patientId },
-        });
-        if (!patient) {
-          throw new NotFoundException(
-            `Patient with id ${updateTeamDto.patientId} not found`,
-          );
+  
+      if (updateTeamDto.patientIds) {
+        const patients = await this.patientRepository.findByIds(updateTeamDto.patientIds);
+        if (!patients.length) {
+          throw new NotFoundException(`No patients found for provided IDs`);
         }
-
-        // Check if patient already belongs to another team
-        const existingTeam = await this.teamRepository.findOne({
-          where: { patient: { id: updateTeamDto.patientId } },
-          relations: ['patient'],
-        });
-
-        if (existingTeam && existingTeam.id !== id) {
-          const errorMessage = `El paciente ya pertenece a otro equipo (${existingTeam.teamName}). Un paciente solo puede pertenecer a un equipo a la vez.`;
-          this.logger.error(errorMessage);
-          throw new BadRequestException(errorMessage);
+  
+        // Filtrar pacientes que ya pertenecen a otro equipo
+        const existingPatients = patients.filter(patient => patient.team && patient.team.id !== id);
+        if (existingPatients.length) {
+          const patientNames = existingPatients.map(p => p.name).join(', ');
+          throw new BadRequestException(`Some patients already belong to other teams: ${patientNames}`);
         }
-
-        team.patient = patient;
+  
+        team.patient = patients; // Asignar los nuevos pacientes
       }
-
-      team.teamName = updateTeamDto.teamName;
-
+  
+      if (updateTeamDto.teamName) {
+        team.teamName = updateTeamDto.teamName;
+      }
+  
       await this.teamRepository.save(team);
       return { message: 'Team updated successfully', team };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error; // Propagamos el error directamente si es un BadRequestException
-      }
       handleDBExceptions(error, this.logger);
     }
   }
+  
 
   async remove(id: string) {
     const team = await this.findOne(id);
