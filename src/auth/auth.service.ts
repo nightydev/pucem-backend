@@ -55,7 +55,7 @@ export class AuthService {
         teamName: user.team.teamName,
         patient: user.team.patient ? {
           ...user.team.patient,
-          caregiver: user.team.patient.caregiver
+          caregivers: user.team.patient.map(p => p.caregiver)
         } : null
       } : null,
       token: this.getJwtToken({ id: user.id }),

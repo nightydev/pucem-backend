@@ -84,8 +84,11 @@ export class Patient {
   @JoinColumn()
   caregiver: Caregiver;
 
-  @OneToOne(() => Team, (team) => team.patient, { cascade: true })
+  // Relación actualizada: cada paciente pertenece a un equipo
+  @ManyToOne(() => Team, (team) => team.patient, { nullable: true })
+  @JoinColumn()
   team: Team;
+  
 
   @OneToMany(
     () => LaboratoryRequest,

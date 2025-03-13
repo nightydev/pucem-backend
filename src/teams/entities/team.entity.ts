@@ -26,9 +26,9 @@ export class Team {
   @ManyToOne(() => Group, (group) => group.team, { nullable: false })
   group: Group;
 
-  @OneToOne(() => Patient, (patient) => patient.team, { nullable: false })
-  @JoinColumn()
-  patient: Patient;
+  // Ahora soporta múltiples pacientes pero mantiene el nombre `patient`
+  @OneToMany(() => Patient, (patient) => patient.team, { cascade: true })
+  patient: Patient[];
 
   @OneToMany(() => User, (user) => user.team, { cascade: true })
   user: User;
