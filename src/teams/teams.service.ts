@@ -89,11 +89,16 @@ export class TeamsService {
       take: limit,
       skip: offset,
       relations: ['patient', 'group', 'user'], // ✅ Agregamos 'user' para contar gestores
+
     });
 
     // Agregar `patientCount` y `userCount`
     const teamsWithCounts = teams.map((team) => ({
       ...team,
+      patientCount: Array.isArray(team.patient) ? team.patient.length : 0, // ✅ validamos que sea array
+    userCount: Array.isArray(team.user) ? team.user.length : 0,          // ✅ validamos que sea array
+    }));
+   
       patientCount: team.patient.length, // ✅ Cuenta pacientes
       userCount: team.user.length, // ✅ Cuenta gestores
     }));
@@ -104,7 +109,7 @@ export class TeamsService {
   async findOne(id: string): Promise<Team> {
     const team = await this.teamRepository.findOne({
       where: { id },
-      relations: ['patient', 'group', 'user'], // ✅ Incluimos `user`
+    relations: ['patient', 'group', 'user'], // ✅ Incluimos `user`
     });
 
     if (!team) {
@@ -114,7 +119,10 @@ export class TeamsService {
     const formattedTeam = {
       ...team,
       patient: Array.isArray(team.patient) ? team.patient : [],
-      userCount: team.user.length, // ✅ Contamos los gestores
+      userCount: Array.isArray(team.user) ? team.user.length : 0,
+    };
+    
+    userCount: Array.isArray(team.user) ? team.user.length : 0, // ✅ validamos que sea array
     };
 
     return formattedTeam;
