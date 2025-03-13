@@ -11,7 +11,6 @@ import { PatientsService } from 'src/patients/patients.service';
 
 @Injectable()
 export class ConsultationService {
-
   private readonly logger = new Logger(ConsultationService.name);
 
   constructor(
@@ -20,16 +19,20 @@ export class ConsultationService {
     @InjectRepository(ConsultationSubsequent)
     private readonly consultationSubsequentRepository: Repository<ConsultationSubsequent>,
     private readonly usersService: UsersService,
-    private readonly patientsService: PatientsService
-  ) { }
+    private readonly patientsService: PatientsService,
+  ) {}
 
-  async createInitial(createConsultationInitialDto: CreateConsultationInitialDto, userId: string) {
+  async createInitial(
+    createConsultationInitialDto: CreateConsultationInitialDto,
+    userId: string,
+  ) {
     try {
-      const { patient: patientId, ...consultationData } = createConsultationInitialDto;
+      const { patient: patientId, ...consultationData } =
+        createConsultationInitialDto;
 
       // Buscar el paciente
       const patient = await this.patientsService.findOne(patientId);
-      
+
       // Buscar el usuario usando el ID del token
       const user = await this.usersService.findOne(userId);
 
@@ -38,14 +41,14 @@ export class ConsultationService {
         ...consultationData,
         user,
         patient,
-        fecha: new Date()
+        fecha: new Date(),
       });
 
       await this.consultationInitialRepository.save(consultation);
 
-      return { 
+      return {
         message: 'Consulta creada exitosamente',
-        consultation 
+        consultation,
       };
     } catch (error) {
       console.error('Error al crear consulta:', error);
@@ -53,36 +56,103 @@ export class ConsultationService {
     }
   }
 
-  async createSubsequent(createConsultationSubsequentDto: CreateConsultationSubsequentDto) {
+  async createSubsequent(
+    createConsultationSubsequentDto: CreateConsultationSubsequentDto,
+  ) {
     try {
-      const { user, patient, consultationInitial, ...rest } = createConsultationSubsequentDto;
+      const { user, patient, consultationInitial, ...rest } =
+        createConsultationSubsequentDto;
 
       const userExists = await this.usersService.findOne(user);
       const patientExists = await this.patientsService.findOne(patient);
-      const consultationInitialExists = await this.findOneInitial(consultationInitial);
+      const consultationInitialExists =
+        await this.findOneInitial(consultationInitial);
 
       const consultation = this.consultationSubsequentRepository.create({
         ...rest,
         user: userExists,
         patient: patientExists,
         consultationInitial: consultationInitialExists,
-        fecha: new Date()
+        fecha: new Date(),
       });
       await this.consultationSubsequentRepository.save(consultation);
 
       return { message: `Consultation created successfully`, consultation };
-
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
   }
 
-  findAll() {
-    return `This action returns all consultation`;
+  async findAll() {
+    try {
+      // Obtener consultas iniciales con sus relaciones
+      const consultationsInitial =
+        await this.consultationInitialRepository.find({
+          relations: ['user', 'patient'],
+          order: { fecha: 'DESC' },
+        });
+
+      // Obtener consultas subsecuentes con sus relaciones
+      const consultationsSubsequent =
+        await this.consultationSubsequentRepository.find({
+          relations: ['user', 'patient', 'consultationInitial'],
+          order: { fecha: 'DESC' },
+        });
+
+      // Formatear las consultas iniciales
+      const formattedInitial = consultationsInitial.map((consultation) => ({
+        id: consultation.id,
+        numeroDeArchivo: consultation.numeroDeArchivo,
+        fecha: consultation.fecha,
+        motivoConsulta: consultation.motivoConsulta,
+        diagnosticosDesc: consultation.diagnosticosDesc,
+        patient: {
+          id: consultation.patient.id,
+          name: consultation.patient.name,
+          lastName: consultation.patient.lastName,
+          document: consultation.patient.document,
+        },
+        user: {
+          id: consultation.user.id,
+          name: consultation.user.name,
+        },
+      }));
+
+      // Formatear las consultas subsecuentes
+      const formattedSubsequent = consultationsSubsequent.map(
+        (consultation) => ({
+          id: consultation.id,
+          numeroDeArchivo: consultation.consultationInitial.numeroDeArchivo,
+          fecha: consultation.fecha,
+          motivoConsulta: consultation.motivoConsulta,
+          diagnosticosDesc: consultation.diagnosticosDesc,
+          patient: {
+            id: consultation.patient.id,
+            name: consultation.patient.name,
+            lastName: consultation.patient.lastName,
+            document: consultation.patient.document,
+          },
+          user: {
+            id: consultation.user.id,
+            name: consultation.user.name,
+          },
+          consultationInitialId: consultation.consultationInitial.id,
+        }),
+      );
+
+      return {
+        consultations: [...formattedInitial, ...formattedSubsequent],
+        total: formattedInitial.length + formattedSubsequent.length,
+      };
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
   }
 
   async findOneInitial(id: string) {
-    const consultation = await this.consultationInitialRepository.findOne({ where: { id } });
+    const consultation = await this.consultationInitialRepository.findOne({
+      where: { id },
+    });
     if (!consultation) {
       throw new NotFoundException(`Consultation with id ${id} not found`);
     }
@@ -90,7 +160,10 @@ export class ConsultationService {
   }
 
   async findLastSubsequent(id: string) {
-    const consultation = await this.consultationSubsequentRepository.findOne({ where: { consultationInitial: { id } }, order: { fecha: 'DESC' } });
+    const consultation = await this.consultationSubsequentRepository.findOne({
+      where: { consultationInitial: { id } },
+      order: { fecha: 'DESC' },
+    });
     if (!consultation) {
       throw new NotFoundException(`Consultation subsequent not found`);
     }
@@ -103,19 +176,21 @@ export class ConsultationService {
 
   async findAllByUser(userId: string) {
     try {
-      const consultationsInitial = await this.consultationInitialRepository.find({
-        where: { user: { id: userId } },
-        relations: ['user', 'patient']
-      });
+      const consultationsInitial =
+        await this.consultationInitialRepository.find({
+          where: { user: { id: userId } },
+          relations: ['user', 'patient'],
+        });
 
-      const consultationsSubsequent = await this.consultationSubsequentRepository.find({
-        where: { user: { id: userId } },
-        relations: ['user', 'patient', 'consultationInitial']
-      });
+      const consultationsSubsequent =
+        await this.consultationSubsequentRepository.find({
+          where: { user: { id: userId } },
+          relations: ['user', 'patient', 'consultationInitial'],
+        });
 
       return {
         initial: consultationsInitial,
-        subsequent: consultationsSubsequent
+        subsequent: consultationsSubsequent,
       };
     } catch (error) {
       handleDBExceptions(error, this.logger);

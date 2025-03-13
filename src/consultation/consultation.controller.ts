@@ -86,4 +86,10 @@ export class ConsultationController {
   findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.consultationService.findAllByUser(userId);
   }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todas las consultas' })
+  findAll() {
+    return this.consultationService.findAll();
+  }
 }
