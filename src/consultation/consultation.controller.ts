@@ -7,14 +7,16 @@ import {
   Delete,
   ParseUUIDPipe,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ConsultationService } from './consultation.service';
 import { CreateConsultationInitialDto } from './dto/create-consultation-initial.dto';
 import { CreateConsultationSubsequentDto } from './dto/create-consultation-subsequent.dto';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PdfService } from '../common/services/pdf.service'; // Corregir importación
 
 // Extender la interfaz Request para incluir el usuario
 interface RequestWithUser extends Request {
@@ -27,7 +29,10 @@ interface RequestWithUser extends Request {
 @Controller('consultations')
 @UseGuards(JwtAuthGuard)
 export class ConsultationController {
-  constructor(private readonly consultationService: ConsultationService) {}
+  constructor(
+    private readonly consultationService: ConsultationService,
+    private readonly pdfService: PdfService,
+  ) {}
 
   @Post('initial')
   @ApiOperation({ summary: 'Create a consultation initial' })
@@ -85,5 +90,28 @@ export class ConsultationController {
   @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
   findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.consultationService.findAllByUser(userId);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todas las consultas' })
+  findAll() {
+    return this.consultationService.findAll();
+  }
+
+  @Get('download')
+  @ApiOperation({ summary: 'Download all consultations as PDF' })
+  async downloadConsultations(@Res() res: Response) {
+    const consultations = await this.consultationService.findAll();
+    const buffer = await this.pdfService.generatePdf(
+      consultations.consultations,
+      'Consultations',
+    );
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=consultations.pdf',
+    });
+
+    res.send(buffer);
   }
 }

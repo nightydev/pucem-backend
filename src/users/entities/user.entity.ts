@@ -105,4 +105,5 @@ export class User {
 
   @OneToMany(() => NursingForm, (nursingForm) => nursingForm.user)
   nursingForms: NursingForm[];
+  length: any;
 }

@@ -53,4 +53,4 @@ import { NursingModule } from './nursing/nursing.module';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
