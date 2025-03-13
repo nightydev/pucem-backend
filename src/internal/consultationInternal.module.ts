@@ -5,10 +5,11 @@ import { ConsultationInternalController } from './consultationInternal.controlle
 import { ConsultationInternal } from './entities/consultation-internal.entity';
 import { PatientsModule } from 'src/patients/patients.module';
 import { UsersModule } from 'src/users/users.module';
+import { PdfService } from '../common/services/pdf.service';
 
 @Module({
   controllers: [ConsultationInternalController],
-  providers: [ConsultationInternalService],
+  providers: [ConsultationInternalService, PdfService],
   imports: [
     TypeOrmModule.forFeature([ConsultationInternal]),
     PatientsModule,

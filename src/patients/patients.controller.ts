@@ -69,6 +69,32 @@ export class PatientsController {
     return this.patientsService.findOne(id);
   }
 
+  @Get('document/:document')
+  @Auth(Role.USER)
+  @ApiOperation({ summary: 'Find patient by document number' })
+  @ApiParam({
+    name: 'document',
+    description: 'Document number (cédula) of the patient',
+    type: String,
+  })
+  async findByDocument(@Param('document') document: string) {
+    return this.patientsService.findByDocument(document);
+  }
+
+  @Get('user/:userId')
+  @Auth(Role.USER)
+  @ApiOperation({
+    summary: 'Obtener todos los pacientes asignados a un usuario específico',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID del usuario para obtener sus pacientes asignados',
+    type: String,
+  })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.patientsService.findAllByUser(userId);
+  }
+
   @Patch(':id')
   @Auth(Role.ADMIN)
   @ApiOperation({ summary: 'Update a patient' })

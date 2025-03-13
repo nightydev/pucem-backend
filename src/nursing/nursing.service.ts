@@ -15,8 +15,8 @@ export class NursingService {
     @InjectRepository(NursingForm)
     private readonly nursingFormRepository: Repository<NursingForm>,
     private readonly userService: UsersService,
-    private readonly patientsService: PatientsService
-  ) { }
+    private readonly patientsService: PatientsService,
+  ) {}
 
   async create(
     createNursingFormDto: CreateNursingFormDto,
@@ -33,14 +33,16 @@ export class NursingService {
       // Verificar que el paciente existe
       const patient: Patient = await this.patientsService.findOne(patientId);
       if (!patient) {
-        throw new NotFoundException(`Paciente con ID ${patientId} no encontrado`);
+        throw new NotFoundException(
+          `Paciente con ID ${patientId} no encontrado`,
+        );
       }
 
       // Crear el formulario con las relaciones
       const nursingForm = this.nursingFormRepository.create({
         ...restForm,
         user,
-        patient
+        patient,
       });
 
       // Guardar y retornar el formulario
@@ -49,7 +51,9 @@ export class NursingService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new Error(`Error al crear el formulario de enfermería: ${error.message}`);
+      throw new Error(
+        `Error al crear el formulario de enfermería: ${error.message}`,
+      );
     }
   }
 
@@ -85,12 +89,14 @@ export class NursingService {
     try {
       const forms = await this.nursingFormRepository.find({
         where: { user: { id: userId } },
-        relations: ['user', 'patient']
+        relations: ['user', 'patient'],
       });
 
       return forms;
     } catch (error) {
-      throw new NotFoundException(`No se encontraron formularios para el usuario con ID ${userId}`);
+      throw new NotFoundException(
+        `No se encontraron formularios para el usuario con ID ${userId}`,
+      );
     }
   }
 }

@@ -17,7 +17,7 @@ export class PatientsService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Caregiver)
     private readonly caregiverRepository: Repository<Caregiver>,
-  ) { }
+  ) {}
 
   async create(createPatientDto: CreatePatientDto) {
     try {
@@ -46,18 +46,83 @@ export class PatientsService {
     const [patients, total] = await this.patientRepository.findAndCount({
       take: limit,
       skip: offset,
-      relations: ['caregiver']
+      relations: ['caregiver'],
     });
 
     return { patients, total };
   }
 
   async findOne(id: string) {
-    const patient = await this.patientRepository.findOne({ where: { id }, relations: ['caregiver'] });
+    const patient = await this.patientRepository.findOne({
+      where: { id },
+      relations: ['caregiver'],
+    });
     if (!patient) {
       throw new NotFoundException(`Patient with id ${id} not found`);
     }
     return patient;
+  }
+
+  async findByDocument(document: string) {
+    try {
+      const patient = await this.patientRepository.findOne({
+        where: { document },
+        relations: ['caregiver'], // Incluimos la relación con el cuidador para tener datos completos
+      });
+
+      if (!patient) {
+        throw new NotFoundException(
+          `Patient with document ${document} not found`,
+        );
+      }
+
+      // Formateamos la respuesta para incluir solo los datos necesarios
+      const formattedPatient = {
+        id: patient.id,
+        document: patient.document,
+        name: patient.name,
+        lastName: patient.lastName,
+        gender: patient.gender,
+        birthday: patient.birthday,
+        typeBeneficiary: patient.typeBeneficiary,
+        typeDisability: patient.typeDisability,
+        percentageDisability: patient.percentageDisability,
+        caregiver: {
+          id: patient.caregiver.id,
+          name: patient.caregiver.name,
+          lastName: patient.caregiver.lastName,
+          document: patient.caregiver.document,
+          cellphoneNumbers: patient.caregiver.cellphoneNumbers,
+        },
+      };
+
+      return formattedPatient;
+    } catch (error) {
+      this.logger.error(`Error finding patient by document: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async findAllByUser(userId: string) {
+    try {
+      this.logger.log(`Buscando pacientes para el usuario: ${userId}`);
+      
+      // Aquí debes ajustar la consulta según tu modelo de datos
+      // Por ejemplo, si tienes una relación entre pacientes y usuarios a través de consultas:
+      const patients = await this.patientRepository
+        .createQueryBuilder('patient')
+        .leftJoinAndSelect('patient.caregiver', 'caregiver')
+        .innerJoin('consultation', 'cons', 'cons.patientId = patient.id')
+        .where('cons.userId = :userId', { userId })
+        .distinct(true)
+        .getMany();
+
+      this.logger.log(`Encontrados ${patients.length} pacientes`);
+      return patients;
+    } catch (error) {
+      this.logger.error(`Error buscando pacientes por usuario: ${error.message}`);
+      throw error;
+    }
   }
 
   async update(id: string, updatePatientDto: UpdatePatientDto) {

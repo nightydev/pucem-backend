@@ -7,17 +7,24 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Res,
+  Logger,
 } from '@nestjs/common';
 import { ConsultationInternalService } from './consultationInternal.service';
 import { CreateConsultationInternalDto } from './dto/create-consultation-internal.dto';
 import { UpdateConsultationInternalDto } from './dto/update-consultation-internal.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { PdfService } from '../common/services/pdf.service';
 
 @ApiTags('Consultations Internal')
 @Controller('consultations-internal')
 export class ConsultationInternalController {
+  private readonly logger = new Logger(ConsultationInternalController.name);
+
   constructor(
     private readonly consultationInternalService: ConsultationInternalService,
+    private readonly pdfService: PdfService,
   ) {}
 
   @Post()
@@ -29,10 +36,48 @@ export class ConsultationInternalController {
     );
   }
 
+  @Get('download')
+  @ApiOperation({ summary: 'Download all internal consultations as PDF' })
+  async downloadConsultations(@Res() res: Response) {
+    try {
+      this.logger.log('Iniciando descarga de consultas internas');
+      const consultations = await this.consultationInternalService.findAll();
+      this.logger.log(`Encontradas ${consultations.length} consultas`);
+
+      const buffer = await this.pdfService.generatePdf(
+        consultations,
+        'Consultas Internas',
+      );
+      this.logger.log('PDF generado correctamente');
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=internal-consultations.pdf',
+      });
+
+      res.send(buffer);
+    } catch (error) {
+      this.logger.error('Error al generar PDF:', error);
+      res.status(500).json({
+        message: 'Error al generar PDF',
+        error: error.message,
+      });
+    }
+  }
+
   @Get()
   @ApiOperation({ summary: 'Obtener todas las consultas internas' })
   findAll() {
     return this.consultationInternalService.findAll();
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({
+    summary: 'Obtener todas las consultas internas de un usuario específico',
+  })
+  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.consultationInternalService.findAllByUser(userId);
   }
 
   @Get(':id')
@@ -73,14 +118,5 @@ export class ConsultationInternalController {
   })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.consultationInternalService.remove(id);
-  }
-
-  @Get('user/:userId')
-  @ApiOperation({
-    summary: 'Obtener todas las consultas internas de un usuario específico',
-  })
-  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
-  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.consultationInternalService.findAllByUser(userId);
   }
 }
