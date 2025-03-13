@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { handleDBExceptions, emptyDtoException } from 'src/common/utils';
 import { Caregiver } from 'src/caregivers/entities/caregiver.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class PatientsService {
@@ -17,6 +18,8 @@ export class PatientsService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Caregiver)
     private readonly caregiverRepository: Repository<Caregiver>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createPatientDto: CreatePatientDto) {
@@ -106,22 +109,62 @@ export class PatientsService {
   async findAllByUser(userId: string) {
     try {
       this.logger.log(`Buscando pacientes para el usuario: ${userId}`);
-      
-      // Aquí debes ajustar la consulta según tu modelo de datos
-      // Por ejemplo, si tienes una relación entre pacientes y usuarios a través de consultas:
+
+      // Consulta corregida con los nombres correctos de las columnas
       const patients = await this.patientRepository
         .createQueryBuilder('patient')
         .leftJoinAndSelect('patient.caregiver', 'caregiver')
-        .innerJoin('consultation', 'cons', 'cons.patientId = patient.id')
-        .where('cons.userId = :userId', { userId })
+        .leftJoin('consultation_initial', 'ci', 'ci."patientId" = patient.id')
+        .leftJoin(
+          'consultation_subsequent',
+          'cs',
+          'cs."patientId" = patient.id',
+        )
+        .leftJoin(
+          'consultation_internal',
+          'cint',
+          'cint."patientId" = patient.id',
+        )
+        .leftJoin('nursing_form', 'nf', 'nf."patientId" = patient.id')
+        .leftJoin('laboratory_request', 'lr', 'lr."patientId" = patient.id')
+        .where('ci."userId" = :userId', { userId })
+        .orWhere('cs."userId" = :userId', { userId })
+        .orWhere('cint."userId" = :userId', { userId })
+        .orWhere('nf."userId" = :userId', { userId })
+        .orWhere('lr."userId" = :userId', { userId })
         .distinct(true)
         .getMany();
 
       this.logger.log(`Encontrados ${patients.length} pacientes`);
-      return patients;
+
+      // Verificar si el usuario tiene pacientes asignados en su equipo
+      if (patients.length === 0) {
+        // Intentar obtener pacientes del equipo del usuario
+        const userWithTeam = await this.userRepository.findOne({
+          where: { id: userId },
+          relations: ['team', 'team.patient'],
+        });
+
+        if (userWithTeam?.team?.patient?.length > 0) {
+          this.logger.log(
+            `Encontrados ${userWithTeam.team.patient.length} pacientes del equipo`,
+          );
+          return { patients: userWithTeam.team.patient };
+        }
+
+        this.logger.warn(
+          `No se encontraron pacientes para el usuario ${userId}`,
+        );
+        return { patients: [] };
+      }
+
+      return { patients };
     } catch (error) {
-      this.logger.error(`Error buscando pacientes por usuario: ${error.message}`);
-      throw error;
+      this.logger.error(
+        `Error buscando pacientes por usuario: ${error.message}`,
+      );
+      this.logger.error(error.stack);
+      throw new Error(`Error al buscar pacientes: ${error.message}`);
     }
   }
 
