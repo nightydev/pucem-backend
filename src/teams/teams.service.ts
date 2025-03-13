@@ -139,6 +139,20 @@ export class TeamsService {
       }
 
       if (updateTeamDto.patientIds && updateTeamDto.patientIds.length > 0) {
+        // Get current team's patients and remove team association
+        const currentPatients = await this.patientRepository.find({
+          where: { team: { id } },
+        });
+
+        // Remove team association from current patients
+        await Promise.all(
+          currentPatients.map(async (patient) => {
+            patient.team = null;
+            await this.patientRepository.save(patient);
+          })
+        );
+
+        // Get new patients
         const newPatients = await this.patientRepository.findByIds(
           updateTeamDto.patientIds,
         );
@@ -147,7 +161,7 @@ export class TeamsService {
           throw new NotFoundException(`No patients found for provided IDs`);
         }
 
-        // Verificar si algún paciente ya pertenece a otro equipo
+        // Verify if any patient already belongs to another team
         const patientsWithTeam = newPatients.filter(
           (patient) => patient.team && patient.team.id !== id,
         );
@@ -158,21 +172,31 @@ export class TeamsService {
           );
         }
 
-        // Asignar el equipo a los nuevos pacientes
-        for (const patient of newPatients) {
-          patient.team = team;
-          await this.patientRepository.save(patient);
-        }
+        // Assign new patients to the team
+        await Promise.all(
+          newPatients.map(async (patient) => {
+            patient.team = team;
+            await this.patientRepository.save(patient);
+          })
+        );
+
+        // Update team's patient array
+        team.patient = newPatients;
       }
 
       if (updateTeamDto.teamName) {
         team.teamName = updateTeamDto.teamName;
       }
 
+      // Save the team with updated relationships
       await this.teamRepository.save(team);
 
-      // Obtener el equipo actualizado con sus relaciones
-      const updatedTeam = await this.findOne(id);
+      // Get the updated team with all relations
+      const updatedTeam = await this.teamRepository.findOne({
+        where: { id },
+        relations: ['patient', 'group', 'user'],
+      });
+
       return { message: 'Team updated successfully', team: updatedTeam };
     } catch (error) {
       handleDBExceptions(error, this.logger);
