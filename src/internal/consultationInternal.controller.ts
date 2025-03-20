@@ -46,7 +46,7 @@ export class ConsultationInternalController {
 
       const buffer = await this.pdfService.generatePdf(
         consultations,
-        'Consultas Internas',
+        'Interconsulta',
       );
       this.logger.log('PDF generado correctamente');
 

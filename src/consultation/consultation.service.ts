@@ -91,20 +91,39 @@ export class ConsultationService {
           relations: ['user', 'patient'],
           order: { fecha: 'DESC' },
         });
-
+  
       // Obtener consultas subsecuentes con sus relaciones
       const consultationsSubsequent =
         await this.consultationSubsequentRepository.find({
           relations: ['user', 'patient', 'consultationInitial'],
           order: { fecha: 'DESC' },
         });
-
-      // Formatear las consultas iniciales
+  
+      // Formatear las consultas iniciales con más detalles
       const formattedInitial = consultationsInitial.map((consultation) => ({
         id: consultation.id,
         numeroDeArchivo: consultation.numeroDeArchivo,
         fecha: consultation.fecha,
         motivoConsulta: consultation.motivoConsulta,
+        antecedentesPatologicosPersonales: consultation.antecedentesPatologicosPersonales?.join(', '),
+        antecedentesPatologicosPersonalesDesc: consultation.antecedentesPatologicosPersonalesDesc,
+        antecedentesPatologicosFamiliares: consultation.antecedentesPatologicosFamiliares?.join(', '),
+        antecedentesPatologicosFamiliaresDesc: consultation.antecedentesPatologicosFamiliaresDesc,
+        enfermedadProblemaActual: consultation.enfermedadProblemaActual,
+        cvaFecha: consultation.cvaFecha,
+        cvaHora: consultation.cvaHora,
+        cvaTemperatura: consultation.cvaTemperatura,
+        cvaPresionArterial: consultation.cvaPresionArterial,
+        cvaPulso: consultation.cvaPulso,
+        cvaFrecuenciaRespiratoria: consultation.cvaFrecuenciaRespiratoria,
+        cvaPeso: consultation.cvaPeso,
+        cvaTalla: consultation.cvaTalla,
+        cvaImc: consultation.cvaImc,
+        cvaPerimetroAbdominal: consultation.cvaPerimetroAbdominal,
+        cvaHemoglobinaCapilar: consultation.cvaHemoglobinaCapilar,
+        cvaGlucosaCapilar: consultation.cvaGlucosaCapilar,
+        cvaPulsioximetria: consultation.cvaPulsioximetria,
+        organosSistemasPatologia: consultation.organosSistemasPatologia?.join(', '),
         diagnosticosDesc: consultation.diagnosticosDesc,
         patient: {
           id: consultation.patient.id,
@@ -115,9 +134,10 @@ export class ConsultationService {
         user: {
           id: consultation.user.id,
           name: consultation.user.name,
+          lastname: consultation.user.lastName,
         },
       }));
-
+  
       // Formatear las consultas subsecuentes
       const formattedSubsequent = consultationsSubsequent.map(
         (consultation) => ({
@@ -139,7 +159,7 @@ export class ConsultationService {
           consultationInitialId: consultation.consultationInitial.id,
         }),
       );
-
+  
       return {
         consultations: [...formattedInitial, ...formattedSubsequent],
         total: formattedInitial.length + formattedSubsequent.length,
@@ -148,6 +168,7 @@ export class ConsultationService {
       handleDBExceptions(error, this.logger);
     }
   }
+  
 
   async findOneInitial(id: string) {
     const consultation = await this.consultationInitialRepository.findOne({

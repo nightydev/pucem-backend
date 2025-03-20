@@ -104,7 +104,7 @@ export class ConsultationController {
     const consultations = await this.consultationService.findAll();
     const buffer = await this.pdfService.generatePdf(
       consultations.consultations,
-      'Consultations',
+      'Consulta Externa',
     );
 
     res.set({

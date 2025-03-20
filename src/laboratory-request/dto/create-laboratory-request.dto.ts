@@ -6,6 +6,7 @@ import {
   MinLength,
   ValidateNested,
   IsOptional,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateMicrobiologyRequestDto } from './create-microbiology-request.dto';
@@ -18,6 +19,13 @@ export class CreateLaboratoryRequestDto {
   @IsString()
   @MinLength(1)
   numero_de_archivo: string;
+
+  @ApiProperty({
+    description: `Date of the laboratory request`,
+    example: '2025-03-20',
+  })
+  @IsDateString()
+  fecha: string;
 
   @ApiProperty({
     description: `Description of the first diagnostic`,
