@@ -1,5 +1,6 @@
-import { IsString, IsArray, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsString, IsArray, IsNotEmpty, IsUUID, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateNursingFormDto {
   @ApiProperty({ description: 'Dominio NANDA relacionado' })
@@ -27,6 +28,12 @@ export class CreateNursingFormDto {
   @IsNotEmpty()
   nanda_planteamiento_del_diagnostico: string;
 
+  @ApiProperty({ description: 'Fecha del formulario', example: '2025-03-20' })
+  @IsDate()
+  @Type(() => Date) // ✅ Asegura que el dato se convierta a tipo Date
+  fecha: Date;
+  
+  
   @ApiProperty({ description: 'Resultado NOC' })
   @IsString()
   @IsNotEmpty()

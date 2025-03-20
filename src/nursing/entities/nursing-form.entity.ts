@@ -70,4 +70,7 @@ export class NursingForm {
 
   @Column('text', { array: true })
   nic_actividades: string[];
+
+  @Column('date', { nullable: true })
+  fecha: Date;
 }
