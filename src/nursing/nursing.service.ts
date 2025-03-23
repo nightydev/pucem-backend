@@ -88,11 +88,13 @@ async findAll(): Promise<any[]> {
       id: form.user.id,
       name: form.user.name,
       lastName: form.user.lastName,
+      document: form.user.document,
     },
     patient: {
       id: form.patient.id,
       name: form.patient.name,
       lastName: form.patient.lastName,
+      document: form.user.document,
     },
   }));
 }
@@ -131,11 +133,13 @@ async findOne(id: string): Promise<any> {
       id: nursingForm.user.id,
       name: nursingForm.user.name,
       lastName: nursingForm.user.lastName,
+      document: nursingForm.user.document,
     },
     patient: {
       id: nursingForm.patient.id,
       name: nursingForm.patient.name,
       lastName: nursingForm.patient.lastName,
+      document: nursingForm.user.document,
     },
   };
 }
