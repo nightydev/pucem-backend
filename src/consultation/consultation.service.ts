@@ -134,7 +134,7 @@ export class ConsultationService {
         user: {
           id: consultation.user.id,
           name: consultation.user.name,
-          lastname: consultation.user.lastName,
+          lastName: consultation.user.lastName,
         },
       }));
   
