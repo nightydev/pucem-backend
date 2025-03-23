@@ -136,7 +136,7 @@ export class ConsultationService {
           name: consultation.user.name,
           lastName: consultation.user.lastName,
         },
-      }));
+      })); // Formatear las consultas subsecuentes
   
       // Formatear las consultas subsecuentes
       const formattedSubsequent = consultationsSubsequent.map(
