@@ -57,19 +57,89 @@ export class NursingService {
     }
   }
 
-  async findAll(): Promise<NursingForm[]> {
-    return await this.nursingFormRepository.find();
+// En NursingFormService.ts
+async findAll(): Promise<any[]> {
+  const nursingForms = await this.nursingFormRepository.find({
+    relations: ['user', 'patient'],
+    order: { fecha: 'DESC' },
+  });
+
+  return nursingForms.map((form) => ({
+    id: form.id,
+    fecha: form.fecha,
+    nanda_dominio: form.nanda_dominio,
+    nanda_clase: form.nanda_clase,
+    nanda_etiqueta_diagnostica: form.nanda_etiqueta_diagnostica,
+    nanda_factor_relacionado: form.nanda_factor_relacionado,
+    nanda_planteamiento_del_diagnostico: form.nanda_planteamiento_del_diagnostico,
+    noc_resultado_noc: form.noc_resultado_noc,
+    noc_dominio: form.noc_dominio,
+    noc_clase: form.noc_clase,
+    noc_indicador: form.noc_indicador,
+    noc_rango: form.noc_rango,
+    noc_diana_inicial: form.noc_diana_inicial,
+    noc_diana_esperada: form.noc_diana_esperada,
+    noc_evaluacion: form.noc_evaluacion,
+    nic_intervencion: form.nic_intervencion,
+    nic_clase: form.nic_clase,
+    nic_actividades: form.nic_actividades,
+
+    user: {
+      id: form.user.id,
+      name: form.user.name,
+      lastName: form.user.lastName,
+    },
+    patient: {
+      id: form.patient.id,
+      name: form.patient.name,
+      lastName: form.patient.lastName,
+    },
+  }));
+}
+
+async findOne(id: string): Promise<any> {
+  const nursingForm = await this.nursingFormRepository.findOne({
+    where: { id },
+    relations: ['user', 'patient'],
+  });
+
+  if (!nursingForm) {
+    throw new NotFoundException(`NursingForm with ID ${id} not found`);
   }
 
-  async findOne(id: string): Promise<NursingForm> {
-    const nursingForm = await this.nursingFormRepository.findOne({
-      where: { id },
-    });
-    if (!nursingForm) {
-      throw new NotFoundException(`NursingForm with ID ${id} not found`);
-    }
-    return nursingForm;
-  }
+  return {
+    id: nursingForm.id,
+    fecha: nursingForm.fecha,
+    nanda_dominio: nursingForm.nanda_dominio,
+    nanda_clase: nursingForm.nanda_clase,
+    nanda_etiqueta_diagnostica: nursingForm.nanda_etiqueta_diagnostica,
+    nanda_factor_relacionado: nursingForm.nanda_factor_relacionado,
+    nanda_planteamiento_del_diagnostico: nursingForm.nanda_planteamiento_del_diagnostico,
+    noc_resultado_noc: nursingForm.noc_resultado_noc,
+    noc_dominio: nursingForm.noc_dominio,
+    noc_clase: nursingForm.noc_clase,
+    noc_indicador: nursingForm.noc_indicador,
+    noc_rango: nursingForm.noc_rango,
+    noc_diana_inicial: nursingForm.noc_diana_inicial,
+    noc_diana_esperada: nursingForm.noc_diana_esperada,
+    noc_evaluacion: nursingForm.noc_evaluacion,
+    nic_intervencion: nursingForm.nic_intervencion,
+    nic_clase: nursingForm.nic_clase,
+    nic_actividades: nursingForm.nic_actividades,
+
+    user: {
+      id: nursingForm.user.id,
+      name: nursingForm.user.name,
+      lastName: nursingForm.user.lastName,
+    },
+    patient: {
+      id: nursingForm.patient.id,
+      name: nursingForm.patient.name,
+      lastName: nursingForm.patient.lastName,
+    },
+  };
+}
+
 
   async update(
     id: string,
