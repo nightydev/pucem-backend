@@ -15,6 +15,7 @@ import { LaboratoryRequestModule } from './laboratory-request/laboratory-request
 import { ConsultationModule } from './consultation/consultation.module';
 import { ConsultationInternalModule } from './internal/consultationInternal.module';
 import { NursingModule } from './nursing/nursing.module';
+import { NeurologicaModule } from './neurologica/neurologica.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { NursingModule } from './nursing/nursing.module';
     ConsultationModule,
     ConsultationInternalModule,
     NursingModule,
+    NeurologicaModule,
   ],
   controllers: [],
   providers: [],
