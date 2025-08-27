@@ -69,6 +69,20 @@ export class LaboratoryRequestController {
     }
   }
 
+// laboratory-request.controller.ts
+@Get('download/:id')
+@ApiOperation({ summary: 'Download one lab request as PDF' })
+async downloadOneRequest(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  const one = await this.laboratoryRequestService.findOne(id);
+  const buffer = await this.pdfService.generatePdf([one], 'Solicitud de Laboratorio');
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=laboratorio-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
+
   @Post()
   @Auth(Role.USER)
   @ApiOperation({ summary: 'Create a request' })

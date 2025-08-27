@@ -107,6 +107,25 @@ export class NeurologicaController {
     }
   }
 
+  // neurologica.controller.ts
+@Get('download/:id')
+@ApiOperation({ summary: 'Download one neurologic evaluation as PDF' })
+@ApiProduces('application/pdf')
+async downloadOneNeurologica(
+  @Param('id', ParseUUIDPipe) id: string,
+  @Res() res: ExpressResponse,
+) {
+  const item = await this.neurologicaService.findOne(id);
+  const buffer = await this.pdfService.generatePdf([item], 'Evaluación Neurológica');
+
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=neurologica-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
+
   @Get(':id')
   @Auth(Role.USER)
   @ApiOperation({ summary: 'Obtener evaluación neurológica por ID' })
