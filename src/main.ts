@@ -15,11 +15,15 @@ async function bootstrap() {
     })
   );
 
-  app.enableCors();
+  // Configure CORS: allow explicit FRONTEND_URL or fall back to common local dev ports
+  const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+    : ['http://localhost:8000', 'http://localhost:3000'];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
-    methods: 'GET,POST,PUT,PATCH,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 
