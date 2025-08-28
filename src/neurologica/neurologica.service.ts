@@ -7,6 +7,13 @@ import { Neurologica } from './entities/neurologica.entity';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { handleDBExceptions } from 'src/common/utils';
 
+type ScreeningImages = {
+  vistaAnteriorUrl?: string;
+  vistaPosteriorUrl?: string;
+  vistaLateralDerechaUrl?: string;
+  vistaLateralIzquierdaUrl?: string;
+};
+
 @Injectable()
 export class NeurologicaService {
   private readonly logger = new Logger(NeurologicaService.name);
@@ -16,54 +23,81 @@ export class NeurologicaService {
     private readonly neurologicaRepository: Repository<Neurologica>,
   ) {}
 
-private calcBarthelTotal(b?: Partial<{
-  vestirse: number;
-  arreglarse: number;
-  deposicion: number;
-  miccion: number;
-  usoRetrete: number;
-  trasladarse: number;
-  deambular: number;
-  escaleras: number;
-}>) {
-  if (!b) return null;
-  const keys = [
-    'vestirse',
-    'arreglarse',
-    'deposicion',
-    'miccion',
-    'usoRetrete',
-    'trasladarse',
-    'deambular',
-    'escaleras',
-  ] as const;
+  // ================= Helpers =================
 
-  let total = 0;
-  for (const k of keys) total += Number(b[k] ?? 0);
-  return Number.isNaN(total) ? null : total;
-}
-  async create(createNeurologicaDto: CreateNeurologicaDto) {
+  private calcBarthelTotal(b?: Partial<{
+    vestirse: number;
+    arreglarse: number;
+    deposicion: number;
+    miccion: number;
+    usoRetrete: number;
+    trasladarse: number;
+    deambular: number;
+    escaleras: number;
+  }>) {
+    if (!b) return null;
+    const keys = [
+      'vestirse',
+      'arreglarse',
+      'deposicion',
+      'miccion',
+      'usoRetrete',
+      'trasladarse',
+      'deambular',
+      'escaleras',
+    ] as const;
+
+    let total = 0;
+    for (const k of keys) {
+      const n = Number(b[k] ?? 0);
+      total += Number.isFinite(n) ? n : 0;
+    }
+    return Number.isNaN(total) ? null : total;
+  }
+
+  private applyImages(target: Neurologica, images?: ScreeningImages) {
+    if (!images) return;
+    if (typeof images.vistaAnteriorUrl !== 'undefined') {
+      target.vistaAnteriorUrl = images.vistaAnteriorUrl ?? null;
+    }
+    if (typeof images.vistaPosteriorUrl !== 'undefined') {
+      target.vistaPosteriorUrl = images.vistaPosteriorUrl ?? null;
+    }
+    if (typeof images.vistaLateralDerechaUrl !== 'undefined') {
+      target.vistaLateralDerechaUrl = images.vistaLateralDerechaUrl ?? null;
+    }
+    if (typeof images.vistaLateralIzquierdaUrl !== 'undefined') {
+      target.vistaLateralIzquierdaUrl = images.vistaLateralIzquierdaUrl ?? null;
+    }
+  }
+
+  // ================= CRUD =================
+
+  // ⬇️ acepta opcionalmente las URLs de imágenes
+  async create(
+    createNeurologicaDto: CreateNeurologicaDto,
+    images?: ScreeningImages,
+  ) {
     try {
       const { alteracionesMarcha, riesgoCaida, barthel, ...neurologicaData } =
         createNeurologicaDto;
 
-      // Mapear alteraciones de marcha
+      // Alteraciones de la marcha
       const marchaData = alteracionesMarcha
         ? {
-            marchaTrendelenburg:
-              alteracionesMarcha.marchaTrendelenburg ?? false,
-            marchaTuerca: alteracionesMarcha.marchaTuerca ?? false,
-            marchaAtaxica: alteracionesMarcha.marchaAtaxica ?? false,
-            marchaSegador: alteracionesMarcha.marchaSegador ?? false,
-            marchaTijeras: alteracionesMarcha.marchaTijeras ?? false,
-            marchaTabetica: alteracionesMarcha.marchaTabetica ?? false,
-            marchaCoreica: alteracionesMarcha.marchaCoreica ?? false,
-            marchaDistonica: alteracionesMarcha.marchaDistonica ?? false,
+            marchaTrendelenburg: !!alteracionesMarcha.marchaTrendelenburg,
+            marchaTuerca: !!alteracionesMarcha.marchaTuerca,
+            marchaAtaxica: !!alteracionesMarcha.marchaAtaxica,
+            marchaSegador: !!alteracionesMarcha.marchaSegador,
+            marchaTijeras: !!alteracionesMarcha.marchaTijeras,
+            marchaTabetica: !!alteracionesMarcha.marchaTabetica,
+            marchaCoreica: !!alteracionesMarcha.marchaCoreica,
+            marchaDistonica: !!alteracionesMarcha.marchaDistonica,
             otrasAlteraciones: alteracionesMarcha.otrasAlteraciones ?? null,
           }
         : {};
 
-      // Mapear riesgo de caída
+      // Riesgo de caída
       const riesgoData = riesgoCaida
         ? {
             tiempoTimedUpGo: riesgoCaida.tiempoTimedUpGo ?? null,
@@ -72,7 +106,7 @@ private calcBarthelTotal(b?: Partial<{
           }
         : {};
 
-      // Mapear Barthel (ítems + total)
+      // Barthel
       const barthelData = barthel
         ? {
             barthelVestirse: barthel.vestirse ?? null,
@@ -87,9 +121,9 @@ private calcBarthelTotal(b?: Partial<{
         : {};
       const barthelTotal = this.calcBarthelTotal(barthel);
 
-      // Nuevos campos directos (del front)
+      // Extras directos
       const extras = {
-        cif: neurologicaData.cif ?? null,
+        cif: Array.isArray(neurologicaData.cif) ? neurologicaData.cif : null,
         observacionesVistaAnterior:
           neurologicaData.observacionesVistaAnterior ?? null,
         observacionesVistaPosterior:
@@ -99,19 +133,22 @@ private calcBarthelTotal(b?: Partial<{
         observacionesVistaLateralIzquierda:
           neurologicaData.observacionesVistaLateralIzquierda ?? null,
         diagnosticoFisioterapeutico:
-          neurologicaData.diagnosticoFisioterapeutico ?? null,
-        planFisioterapeutico: neurologicaData.planFisioterapeutico ?? null,
+          (neurologicaData.diagnosticoFisioterapeutico?.trim?.() || null),
+        planFisioterapeutico:
+          (neurologicaData.planFisioterapeutico?.trim?.() || null),
       };
 
-      // Crear entidad
       const neurologica = this.neurologicaRepository.create({
-        ...neurologicaData, // name, ci, edad, diagnostico, etc.
+        ...neurologicaData, // name, ci, edad, diagnostico, discapacidad, etc.
         ...marchaData,
         ...riesgoData,
         ...barthelData,
         ...extras,
         barthelTotal,
       });
+
+      // ⬅️ merge de imágenes si vienen
+      this.applyImages(neurologica, images);
 
       await this.neurologicaRepository.save(neurologica);
       return {
@@ -145,20 +182,19 @@ private calcBarthelTotal(b?: Partial<{
   }
 
   async findOne(id: string) {
-    const neurologica = await this.neurologicaRepository.findOne({
-      where: { id },
-    });
-
+    const neurologica = await this.neurologicaRepository.findOne({ where: { id } });
     if (!neurologica) {
-      throw new NotFoundException(
-        `Evaluación neurológica con ID ${id} no encontrada`,
-      );
+      throw new NotFoundException(`Evaluación neurológica con ID ${id} no encontrada`);
     }
-
     return neurologica;
   }
 
-  async update(id: string, updateNeurologicaDto: UpdateNeurologicaDto) {
+  // ⬇️ admite opcionalmente actualizar imágenes
+  async update(
+    id: string,
+    updateNeurologicaDto: UpdateNeurologicaDto,
+    images?: ScreeningImages,
+  ) {
     try {
       const { alteracionesMarcha, riesgoCaida, barthel, ...neurologicaData } =
         updateNeurologicaDto;
@@ -169,8 +205,7 @@ private calcBarthelTotal(b?: Partial<{
       if (alteracionesMarcha) {
         Object.assign(neurologica, {
           marchaTrendelenburg:
-            alteracionesMarcha.marchaTrendelenburg ??
-            neurologica.marchaTrendelenburg,
+            alteracionesMarcha.marchaTrendelenburg ?? neurologica.marchaTrendelenburg,
           marchaTuerca:
             alteracionesMarcha.marchaTuerca ?? neurologica.marchaTuerca,
           marchaAtaxica:
@@ -186,8 +221,7 @@ private calcBarthelTotal(b?: Partial<{
           marchaDistonica:
             alteracionesMarcha.marchaDistonica ?? neurologica.marchaDistonica,
           otrasAlteraciones:
-            alteracionesMarcha.otrasAlteraciones ??
-            neurologica.otrasAlteraciones,
+            alteracionesMarcha.otrasAlteraciones ?? neurologica.otrasAlteraciones,
         });
       }
 
@@ -207,15 +241,11 @@ private calcBarthelTotal(b?: Partial<{
       if (barthel) {
         Object.assign(neurologica, {
           barthelVestirse: barthel.vestirse ?? neurologica.barthelVestirse,
-          barthelArreglarse:
-            barthel.arreglarse ?? neurologica.barthelArreglarse,
-          barthelDeposicion:
-            barthel.deposicion ?? neurologica.barthelDeposicion,
+          barthelArreglarse: barthel.arreglarse ?? neurologica.barthelArreglarse,
+          barthelDeposicion: barthel.deposicion ?? neurologica.barthelDeposicion,
           barthelMiccion: barthel.miccion ?? neurologica.barthelMiccion,
-          barthelUsoRetrete:
-            barthel.usoRetrete ?? neurologica.barthelUsoRetrete,
-          barthelTrasladarse:
-            barthel.trasladarse ?? neurologica.barthelTrasladarse,
+          barthelUsoRetrete: barthel.usoRetrete ?? neurologica.barthelUsoRetrete,
+          barthelTrasladarse: barthel.trasladarse ?? neurologica.barthelTrasladarse,
           barthelDeambular: barthel.deambular ?? neurologica.barthelDeambular,
           barthelEscaleras: barthel.escaleras ?? neurologica.barthelEscaleras,
         });
@@ -223,41 +253,35 @@ private calcBarthelTotal(b?: Partial<{
         if (total !== null) neurologica.barthelTotal = total;
       }
 
-      // Nuevos campos directos (solo si vienen en el DTO)
+      // Campos directos
       if ('cif' in neurologicaData)
-        neurologica.cif = neurologicaData.cif ?? null;
+        neurologica.cif = Array.isArray(neurologicaData.cif) ? neurologicaData.cif : null;
 
       if ('observacionesVistaAnterior' in neurologicaData)
         neurologica.observacionesVistaAnterior =
-          neurologicaData.observacionesVistaAnterior ??
-          neurologica.observacionesVistaAnterior;
+          neurologicaData.observacionesVistaAnterior ?? neurologica.observacionesVistaAnterior;
 
       if ('observacionesVistaPosterior' in neurologicaData)
         neurologica.observacionesVistaPosterior =
-          neurologicaData.observacionesVistaPosterior ??
-          neurologica.observacionesVistaPosterior;
+          neurologicaData.observacionesVistaPosterior ?? neurologica.observacionesVistaPosterior;
 
       if ('observacionesVistaLateralDerecha' in neurologicaData)
         neurologica.observacionesVistaLateralDerecha =
-          neurologicaData.observacionesVistaLateralDerecha ??
-          neurologica.observacionesVistaLateralDerecha;
+          neurologicaData.observacionesVistaLateralDerecha ?? neurologica.observacionesVistaLateralDerecha;
 
       if ('observacionesVistaLateralIzquierda' in neurologicaData)
         neurologica.observacionesVistaLateralIzquierda =
-          neurologicaData.observacionesVistaLateralIzquierda ??
-          neurologica.observacionesVistaLateralIzquierda;
+          neurologicaData.observacionesVistaLateralIzquierda ?? neurologica.observacionesVistaLateralIzquierda;
 
       if ('diagnosticoFisioterapeutico' in neurologicaData)
         neurologica.diagnosticoFisioterapeutico =
-          neurologicaData.diagnosticoFisioterapeutico ??
-          neurologica.diagnosticoFisioterapeutico;
+          (neurologicaData.diagnosticoFisioterapeutico?.trim?.() || neurologica.diagnosticoFisioterapeutico || null);
 
       if ('planFisioterapeutico' in neurologicaData)
         neurologica.planFisioterapeutico =
-          neurologicaData.planFisioterapeutico ??
-          neurologica.planFisioterapeutico;
+          (neurologicaData.planFisioterapeutico?.trim?.() || neurologica.planFisioterapeutico || null);
 
-      // Asigna el resto de campos simples, sólo si vienen en el DTO
+      // Resto de campos simples (si vienen)
       Object.entries(neurologicaData).forEach(([k, v]) => {
         if (
           ![
@@ -271,11 +295,13 @@ private calcBarthelTotal(b?: Partial<{
           ].includes(k)
         ) {
           if (typeof v !== 'undefined') {
-            // @ts-ignore: index access
-            neurologica[k] = v;
+            (neurologica as any)[k] = v;
           }
         }
       });
+
+      // ⬅️ merge de imágenes si vienen en esta actualización
+      this.applyImages(neurologica, images);
 
       await this.neurologicaRepository.save(neurologica);
       return {
@@ -291,9 +317,6 @@ private calcBarthelTotal(b?: Partial<{
     const neurologica = await this.findOne(id);
     await this.neurologicaRepository.remove(neurologica);
     return { message: 'Evaluación neurológica eliminada exitosamente' };
-    // Alternativa segura:
-    // await this.neurologicaRepository.delete(id);
-    // return { message: 'Evaluación neurológica eliminada exitosamente' };
   }
 
   async findByCI(ci: string) {

@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index
 } from 'typeorm';
 
 @Entity({ name: 'neurologicas' })
@@ -61,6 +62,10 @@ export class Neurologica {
 
   @Column('text', { nullable: true })
   entornoFamiliar?: string;
+
+
+  @Column('jsonb', { nullable: true }) bodyMap?: any;           // partes seleccionadas / niveles
+  @Column('jsonb', { nullable: true }) dolorRegistros?: any[];  // {region, tiempo, irradiado, tipo, evn, subjetiva, alivian, agravan, comentarios}
 
   // Alteraciones de la marcha
   @Column('boolean', { default: false })
@@ -139,8 +144,21 @@ export class Neurologica {
   barthelTotal?: number;
 
   // ===== NUEVOS CAMPOS (alineados al front) =====
+  // Screening Postural (URL de imágenes)
+  @Column('text', { nullable: true })
+  vistaAnteriorUrl?: string;
 
+  @Column('text', { nullable: true })
+  vistaPosteriorUrl?: string;
+
+  @Column('text', { nullable: true })
+  vistaLateralDerechaUrl?: string;
+
+  @Column('text', { nullable: true })
+  vistaLateralIzquierdaUrl?: string;
   // Observaciones Screening Postural (texto)
+
+
   @Column('text', { nullable: true })
   observacionesVistaAnterior?: string;
 
@@ -154,8 +172,8 @@ export class Neurologica {
   observacionesVistaLateralIzquierda?: string;
 
   // CIF (array de códigos) - en Postgres usa text[]
-  @Column('text', { array: true, nullable: true })
-  cif?: string[];
+  @Column('jsonb', { nullable: true })
+  cif?: { codigo: string; descripcion: string }[];
 
   // Diagnóstico y plan fisioterapéutico
   @Column('text', { nullable: true })
@@ -166,6 +184,8 @@ export class Neurologica {
 
   // ===============================================
 
+
+  
   @CreateDateColumn()
   createdAt: Date;
 
