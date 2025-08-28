@@ -283,7 +283,7 @@ export class CreateNeurologicaDto {
   })
   @IsArray() @IsOptional()
   // Nota: si quieres validar cada string, agrega @IsString({ each: true })
-  cif?: string[];
+  cif?: { codigo: string; descripcion: string }[];
 
   @ApiProperty({
     description: 'Observaciones Screening - Vista Anterior',

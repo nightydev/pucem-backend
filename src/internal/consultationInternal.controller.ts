@@ -65,6 +65,20 @@ export class ConsultationInternalController {
     }
   }
 
+// consultation-internal.controller.ts
+@Get('download/:id')
+@ApiOperation({ summary: 'Download one internal consultation as PDF' })
+async downloadOneInternal(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  const one = await this.consultationInternalService.findOne(id);
+  const buffer = await this.pdfService.generatePdf([one], 'Interconsulta');
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=internal-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
+
   @Get()
   @ApiOperation({ summary: 'Obtener todas las consultas internas' })
   findAll() {

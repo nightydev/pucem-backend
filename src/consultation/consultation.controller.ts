@@ -114,4 +114,18 @@ export class ConsultationController {
 
     res.send(buffer);
   }
+
+  // consultations.controller.ts
+@Get('download/:id')
+@ApiOperation({ summary: 'Download one external consultation as PDF' })
+async downloadOne(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  const one = await this.consultationService.findOneInitial(id);
+  const buffer = await this.pdfService.generatePdf([one], 'Consulta Externa');
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=consulta-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
 }

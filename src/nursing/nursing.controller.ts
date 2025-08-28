@@ -68,6 +68,22 @@ export class NursingController {
     }
   }
 
+// nursing.controller.ts
+@Get('download/:id')
+@Version('1')
+@ApiOperation({ summary: 'Download one nursing form as PDF' })
+async downloadOneForm(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  const form = await this.nursingService.findOne(id);
+  const buffer = await this.pdfService.generatePdf([form], 'Formulario de Enfermería');
+
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=nursing-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.nursingService.findOne(id);

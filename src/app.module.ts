@@ -3,6 +3,8 @@ import * as path from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
+
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CareersModule } from './careers/careers.module';
@@ -20,6 +22,13 @@ import { NeurologicaModule } from './neurologica/neurologica.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+
+    // Sirve archivos estáticos de /uploads bajo /uploads (p.ej. http://localhost:3000/uploads/neurologica/imagen.jpg)
+    ServeStaticModule.forRoot({
+      rootPath: path.join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -30,15 +39,16 @@ import { NeurologicaModule } from './neurologica/neurologica.module';
       autoLoadEntities: true,
       synchronize: true,
       // TODO: Después de que Azure complete la actualización de certificados SSL intermedios (iniciada el 31 de enero de 2024),
-      //descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
+      // descargar los nuevos certificados y volver a establecer rejectUnauthorized a true
       ssl: {
         rejectUnauthorized: false,
         ca: fs
-          .readFileSync(path.join(__dirname, '../', process.env.DB_SSL_FILE))
+          .readFileSync(path.join(__dirname, '../', process.env.DB_SSL_FILE!))
           .toString(),
       },
       namingStrategy: new SnakeNamingStrategy(),
     }),
+
     UsersModule,
     AuthModule,
     CareersModule,
