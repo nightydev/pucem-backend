@@ -64,7 +64,7 @@ export class Neurologica {
   entornoFamiliar?: string;
 
   @Column('jsonb', { nullable: true })
-  bodyMap?: any[]; // partes seleccionadas / niveles
+  bodyMap?: any; // partes seleccionadas / niveles - descripcion opcional
 
   @Column('jsonb', { nullable: true })
   dolorRegistros?: any[]; // {region, tiempo, irradiado, tipo, evn, subjetiva, alivian, agravan, comentarios}
