@@ -166,29 +166,6 @@ class BarthelIndexDto {
   @IsOptional()
   escaleras?: number;
 }
-class BodyMapDto {
-  @ApiProperty({
-    description: 'Mapa corporal con ID de parte y nivel de dolor',
-    // eslint-disable-next-line prettier/prettier
-    example: {
-      id_parte_cabeza: {
-        nivel: 5,
-        description: 'Dolor intenso',
-      },
-      id_parte_torso: {
-        nivel: 3,
-        description: 'Dolor moderado',
-      },
-      id_parte_brazo_derecho: {
-        nivel: 2,
-        description: 'Dolor leve',
-      },
-    },
-  })
-  @IsObject()
-  @IsOptional()
-  bodyMap?: { [key: string]: { nivel: number; description: string } }; // ID de parte como string y nivel como number
-}
 
 class DolorRegistroDto {
   @ApiProperty({
@@ -391,32 +368,25 @@ export class CreateNeurologicaDto {
 
   @ApiProperty({
     description: 'Mapa corporal con partes seleccionadas y niveles de dolor',
-    // eslint-disable-next-line prettier/prettier
-    example: [
-      {
-        id_parte_cabeza: {
-          nivel: 5,
-          description: 'Dolor intenso',
-        },
-        id_parte_torso: {
-          nivel: 3,
-          description: 'Dolor moderado',
-        },
-        id_parte_brazo_derecho: {
-          nivel: 2,
-          description: 'Dolor leve',
-        },
+    example: {
+      id_parte_cabeza: {
+        nivel: 5,
+        description: 'Dolor intenso',
       },
-    ],
+      id_parte_torso: {
+        nivel: 3,
+        description: 'Dolor moderado',
+      },
+      id_parte_brazo_derecho: {
+        nivel: 2,
+        description: 'Dolor leve',
+      },
+    },
     required: false,
-    isArray: true,
-    type: BodyMapDto,
   })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BodyMapDto)
   @IsOptional()
-  bodyMap?: BodyMapDto[];
+  @IsObject()
+  bodyMap?: Record<string, { nivel: number; description?: string }>; // ID de parte como string y nivel como number;
 
   @ApiProperty({
     description: 'Registros detallados de dolor',
