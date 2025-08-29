@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateNeurologicaDto } from './dto/create-neurologica.dto';
-import { UpdateNeurologicaDto } from './dto/update-neurologica.dto';
-import { Neurologica } from './entities/neurologica.entity';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { handleDBExceptions } from 'src/common/utils';
+import { CreateNeurologicaDto } from '@/neurologica/dto/create-neurologica.dto';
+import { UpdateNeurologicaDto } from '@/neurologica/dto/update-neurologica.dto';
+import { Neurologica } from '@/neurologica/entities/neurologica.entity';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { handleDBExceptions } from '@/common/utils';
 
 type ScreeningImages = {
   vistaAnteriorUrl?: string;
@@ -81,8 +81,16 @@ export class NeurologicaService {
     images?: ScreeningImages,
   ) {
     try {
-      const { alteracionesMarcha, riesgoCaida, barthel, ...neurologicaData } =
-        createNeurologicaDto;
+      const {
+        alteracionesMarcha,
+        riesgoCaida,
+        barthel,
+        bodyMap,
+        dolorRegistros,
+        ...neurologicaData
+      } = createNeurologicaDto;
+
+      this.logger.log('Creando PENE...');
 
       // Alteraciones de la marcha
       const marchaData = alteracionesMarcha
@@ -140,12 +148,32 @@ export class NeurologicaService {
           neurologicaData.planFisioterapeutico?.trim?.() || null,
       };
 
+      const bodyMapData =
+        bodyMap && typeof bodyMap === 'object' ? bodyMap : null;
+
+      const dolorRegistrosData =
+        dolorRegistros && Array.isArray(dolorRegistros)
+          ? dolorRegistros.map((registro) => ({
+              region: registro.region,
+              tiempo: registro.tiempo,
+              irradiado: registro.irradiado,
+              tipo: registro.tipo,
+              evn: registro.evn,
+              subjetiva: registro.subjetiva,
+              alivian: registro.alivian || [],
+              agravan: registro.agravan || [],
+              comentarios: registro.comentarios || null,
+            }))
+          : null;
+
       const neurologica = this.neurologicaRepository.create({
         ...neurologicaData, // name, ci, edad, diagnostico, discapacidad, etc.
         ...marchaData,
         ...riesgoData,
         ...barthelData,
         ...extras,
+        bodyMap: bodyMapData,
+        dolorRegistros: dolorRegistrosData,
         barthelTotal,
       });
 
@@ -195,15 +223,21 @@ export class NeurologicaService {
     return neurologica;
   }
 
-  // ⬇️ admite opcionalmente actualizar imágenes
+  // admite opcionalmente actualizar imágenes
   async update(
     id: string,
     updateNeurologicaDto: UpdateNeurologicaDto,
     images?: ScreeningImages,
   ) {
     try {
-      const { alteracionesMarcha, riesgoCaida, barthel, ...neurologicaData } =
-        updateNeurologicaDto;
+      const {
+        alteracionesMarcha,
+        riesgoCaida,
+        barthel,
+        bodyMap,
+        dolorRegistros,
+        ...neurologicaData
+      } = updateNeurologicaDto;
 
       const neurologica = await this.findOne(id);
 
@@ -303,11 +337,35 @@ export class NeurologicaService {
           neurologica.planFisioterapeutico ||
           null;
 
+      if (bodyMap !== undefined) {
+        neurologica.bodyMap =
+          bodyMap && typeof bodyMap === 'object' ? bodyMap : null;
+      }
+
+      if (dolorRegistros !== undefined) {
+        neurologica.dolorRegistros =
+          dolorRegistros && Array.isArray(dolorRegistros)
+            ? dolorRegistros.map((registro) => ({
+                region: registro.region,
+                tiempo: registro.tiempo,
+                irradiado: registro.irradiado,
+                tipo: registro.tipo,
+                evn: registro.evn,
+                subjetiva: registro.subjetiva,
+                alivian: registro.alivian || [],
+                agravan: registro.agravan || [],
+                comentarios: registro.comentarios || null,
+              }))
+            : null;
+      }
+
       // Resto de campos simples (si vienen)
       Object.entries(neurologicaData).forEach(([k, v]) => {
         if (
           ![
             'cif',
+            'bodyMap',
+            'dolorRegistros',
             'observacionesVistaAnterior',
             'observacionesVistaPosterior',
             'observacionesVistaLateralDerecha',
@@ -322,7 +380,7 @@ export class NeurologicaService {
         }
       });
 
-      // ⬅️ merge de imágenes si vienen en esta actualización
+      // merge de imágenes si vienen en esta actualización
       this.applyImages(neurologica, images);
 
       await this.neurologicaRepository.save(neurologica);
