@@ -41,10 +41,12 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 // ---------- helpers para Multer ----------
+// eslint-disable-next-line @typescript-eslint/ban-types
 function fileNameEdit(_: any, file: Express.Multer.File, cb: Function) {
   const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
   cb(null, `${file.fieldname}-${unique}${extname(file.originalname)}`);
 }
+// eslint-disable-next-line @typescript-eslint/ban-types
 function imageFilter(_: any, file: Express.Multer.File, cb: Function) {
   if (/^image\/(png|jpe?g|gif|webp)$/i.test(file.mimetype)) cb(null, true);
   else cb(new Error('Solo imágenes (png/jpg/jpeg/gif/webp)'), false);

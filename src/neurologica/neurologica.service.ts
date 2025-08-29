@@ -25,16 +25,18 @@ export class NeurologicaService {
 
   // ================= Helpers =================
 
-  private calcBarthelTotal(b?: Partial<{
-    vestirse: number;
-    arreglarse: number;
-    deposicion: number;
-    miccion: number;
-    usoRetrete: number;
-    trasladarse: number;
-    deambular: number;
-    escaleras: number;
-  }>) {
+  private calcBarthelTotal(
+    b?: Partial<{
+      vestirse: number;
+      arreglarse: number;
+      deposicion: number;
+      miccion: number;
+      usoRetrete: number;
+      trasladarse: number;
+      deambular: number;
+      escaleras: number;
+    }>,
+  ) {
     if (!b) return null;
     const keys = [
       'vestirse',
@@ -73,7 +75,7 @@ export class NeurologicaService {
 
   // ================= CRUD =================
 
-  // ⬇️ acepta opcionalmente las URLs de imágenes
+  // acepta opcionalmente las URLs de imágenes
   async create(
     createNeurologicaDto: CreateNeurologicaDto,
     images?: ScreeningImages,
@@ -133,9 +135,9 @@ export class NeurologicaService {
         observacionesVistaLateralIzquierda:
           neurologicaData.observacionesVistaLateralIzquierda ?? null,
         diagnosticoFisioterapeutico:
-          (neurologicaData.diagnosticoFisioterapeutico?.trim?.() || null),
+          neurologicaData.diagnosticoFisioterapeutico?.trim?.() || null,
         planFisioterapeutico:
-          (neurologicaData.planFisioterapeutico?.trim?.() || null),
+          neurologicaData.planFisioterapeutico?.trim?.() || null,
       };
 
       const neurologica = this.neurologicaRepository.create({
@@ -147,7 +149,7 @@ export class NeurologicaService {
         barthelTotal,
       });
 
-      // ⬅️ merge de imágenes si vienen
+      // merge de imágenes si vienen
       this.applyImages(neurologica, images);
 
       await this.neurologicaRepository.save(neurologica);
@@ -182,9 +184,13 @@ export class NeurologicaService {
   }
 
   async findOne(id: string) {
-    const neurologica = await this.neurologicaRepository.findOne({ where: { id } });
+    const neurologica = await this.neurologicaRepository.findOne({
+      where: { id },
+    });
     if (!neurologica) {
-      throw new NotFoundException(`Evaluación neurológica con ID ${id} no encontrada`);
+      throw new NotFoundException(
+        `Evaluación neurológica con ID ${id} no encontrada`,
+      );
     }
     return neurologica;
   }
@@ -205,7 +211,8 @@ export class NeurologicaService {
       if (alteracionesMarcha) {
         Object.assign(neurologica, {
           marchaTrendelenburg:
-            alteracionesMarcha.marchaTrendelenburg ?? neurologica.marchaTrendelenburg,
+            alteracionesMarcha.marchaTrendelenburg ??
+            neurologica.marchaTrendelenburg,
           marchaTuerca:
             alteracionesMarcha.marchaTuerca ?? neurologica.marchaTuerca,
           marchaAtaxica:
@@ -221,7 +228,8 @@ export class NeurologicaService {
           marchaDistonica:
             alteracionesMarcha.marchaDistonica ?? neurologica.marchaDistonica,
           otrasAlteraciones:
-            alteracionesMarcha.otrasAlteraciones ?? neurologica.otrasAlteraciones,
+            alteracionesMarcha.otrasAlteraciones ??
+            neurologica.otrasAlteraciones,
         });
       }
 
@@ -241,11 +249,15 @@ export class NeurologicaService {
       if (barthel) {
         Object.assign(neurologica, {
           barthelVestirse: barthel.vestirse ?? neurologica.barthelVestirse,
-          barthelArreglarse: barthel.arreglarse ?? neurologica.barthelArreglarse,
-          barthelDeposicion: barthel.deposicion ?? neurologica.barthelDeposicion,
+          barthelArreglarse:
+            barthel.arreglarse ?? neurologica.barthelArreglarse,
+          barthelDeposicion:
+            barthel.deposicion ?? neurologica.barthelDeposicion,
           barthelMiccion: barthel.miccion ?? neurologica.barthelMiccion,
-          barthelUsoRetrete: barthel.usoRetrete ?? neurologica.barthelUsoRetrete,
-          barthelTrasladarse: barthel.trasladarse ?? neurologica.barthelTrasladarse,
+          barthelUsoRetrete:
+            barthel.usoRetrete ?? neurologica.barthelUsoRetrete,
+          barthelTrasladarse:
+            barthel.trasladarse ?? neurologica.barthelTrasladarse,
           barthelDeambular: barthel.deambular ?? neurologica.barthelDeambular,
           barthelEscaleras: barthel.escaleras ?? neurologica.barthelEscaleras,
         });
@@ -255,31 +267,41 @@ export class NeurologicaService {
 
       // Campos directos
       if ('cif' in neurologicaData)
-        neurologica.cif = Array.isArray(neurologicaData.cif) ? neurologicaData.cif : null;
+        neurologica.cif = Array.isArray(neurologicaData.cif)
+          ? neurologicaData.cif
+          : null;
 
       if ('observacionesVistaAnterior' in neurologicaData)
         neurologica.observacionesVistaAnterior =
-          neurologicaData.observacionesVistaAnterior ?? neurologica.observacionesVistaAnterior;
+          neurologicaData.observacionesVistaAnterior ??
+          neurologica.observacionesVistaAnterior;
 
       if ('observacionesVistaPosterior' in neurologicaData)
         neurologica.observacionesVistaPosterior =
-          neurologicaData.observacionesVistaPosterior ?? neurologica.observacionesVistaPosterior;
+          neurologicaData.observacionesVistaPosterior ??
+          neurologica.observacionesVistaPosterior;
 
       if ('observacionesVistaLateralDerecha' in neurologicaData)
         neurologica.observacionesVistaLateralDerecha =
-          neurologicaData.observacionesVistaLateralDerecha ?? neurologica.observacionesVistaLateralDerecha;
+          neurologicaData.observacionesVistaLateralDerecha ??
+          neurologica.observacionesVistaLateralDerecha;
 
       if ('observacionesVistaLateralIzquierda' in neurologicaData)
         neurologica.observacionesVistaLateralIzquierda =
-          neurologicaData.observacionesVistaLateralIzquierda ?? neurologica.observacionesVistaLateralIzquierda;
+          neurologicaData.observacionesVistaLateralIzquierda ??
+          neurologica.observacionesVistaLateralIzquierda;
 
       if ('diagnosticoFisioterapeutico' in neurologicaData)
         neurologica.diagnosticoFisioterapeutico =
-          (neurologicaData.diagnosticoFisioterapeutico?.trim?.() || neurologica.diagnosticoFisioterapeutico || null);
+          neurologicaData.diagnosticoFisioterapeutico?.trim?.() ||
+          neurologica.diagnosticoFisioterapeutico ||
+          null;
 
       if ('planFisioterapeutico' in neurologicaData)
         neurologica.planFisioterapeutico =
-          (neurologicaData.planFisioterapeutico?.trim?.() || neurologica.planFisioterapeutico || null);
+          neurologicaData.planFisioterapeutico?.trim?.() ||
+          neurologica.planFisioterapeutico ||
+          null;
 
       // Resto de campos simples (si vienen)
       Object.entries(neurologicaData).forEach(([k, v]) => {
