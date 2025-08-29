@@ -1,7 +1,5 @@
 FROM node:20-bullseye
 
-RUN apt update && apt install
-
 WORKDIR /app
 
 COPY . .
