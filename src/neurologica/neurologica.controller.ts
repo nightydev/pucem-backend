@@ -27,14 +27,14 @@ import {
 import { Response as ExpressResponse, Request } from 'express';
 import type { Express } from 'express'; // ⬅️ TIPOS para Multer
 
-import { NeurologicaService } from './neurologica.service';
-import { CreateNeurologicaDto } from './dto/create-neurologica.dto';
-import { UpdateNeurologicaDto } from './dto/update-neurologica.dto';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { Auth } from 'src/auth/decorators/auth.decorator';
-import { Role } from 'src/users/entities/user.entity';
+import { NeurologicaService } from '@/neurologica/neurologica.service';
+import { CreateNeurologicaDto } from '@/neurologica/dto/create-neurologica.dto';
+import { UpdateNeurologicaDto } from '@/neurologica/dto/update-neurologica.dto';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { Auth } from '@/auth/decorators/auth.decorator';
+import { Role } from '@/users/entities/user.entity';
 
-import { PdfService } from '../common/services/pdf.service';
+import { PdfService } from '@/common/services/pdf.service';
 
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
