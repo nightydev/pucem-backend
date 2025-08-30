@@ -18,6 +18,7 @@ import { ConsultationModule } from './consultation/consultation.module';
 import { ConsultationInternalModule } from './internal/consultationInternal.module';
 import { NursingModule } from './nursing/nursing.module';
 import { NeurologicaModule } from './neurologica/neurologica.module';
+import { ApiKeyModule } from './api-key/api-key.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { NeurologicaModule } from './neurologica/neurologica.module';
     ConsultationInternalModule,
     NursingModule,
     NeurologicaModule,
+    ApiKeyModule,
   ],
   controllers: [],
   providers: [],
