@@ -20,6 +20,11 @@ export class LaboratoryRequest {
   })
   numero_de_archivo: string;
 
+  @Column('date', {
+    nullable: false,
+  })
+  fecha: string;
+
   @Column('text', {
     nullable: false,
   })

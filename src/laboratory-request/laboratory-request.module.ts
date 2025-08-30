@@ -7,10 +7,11 @@ import { MicrobiologyRequest } from './entities/microbiology-request.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { PatientsModule } from 'src/patients/patients.module';
+import { PdfService } from '../common/services/pdf.service';
 
 @Module({
   controllers: [LaboratoryRequestController],
-  providers: [LaboratoryRequestService],
+  providers: [LaboratoryRequestService, PdfService],
   imports: [
     TypeOrmModule.forFeature([LaboratoryRequest, MicrobiologyRequest]),
     AuthModule,

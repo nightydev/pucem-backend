@@ -4,10 +4,8 @@ import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -26,10 +24,9 @@ export class Team {
   @ManyToOne(() => Group, (group) => group.team, { nullable: false })
   group: Group;
 
-  @OneToOne(() => Patient, (patient) => patient.team, { nullable: false })
-  @JoinColumn()
-  patient: Patient;
+  @OneToMany(() => Patient, (patient) => patient.team)
+  patient: Patient[];
 
   @OneToMany(() => User, (user) => user.team, { cascade: true })
-  user: User;
+  user: User[];
 }

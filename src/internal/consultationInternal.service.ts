@@ -10,14 +10,13 @@ import { handleDBExceptions } from 'src/common/utils';
 
 @Injectable()
 export class ConsultationInternalService {
-
   private readonly logger = new Logger(ConsultationInternalService.name);
 
   constructor(
     @InjectRepository(ConsultationInternal)
     private readonly consultationInternalRepository: Repository<ConsultationInternal>,
     private readonly usersService: UsersService,
-    private readonly patientsService: PatientsService
+    private readonly patientsService: PatientsService,
   ) {}
 
   async create(createConsultationInternalDto: CreateConsultationInternalDto) {
@@ -35,8 +34,7 @@ export class ConsultationInternalService {
       });
 
       await this.consultationInternalRepository.save(consultation);
-      return { message: `Consulta interna creada exitosamente`, consultation };
-
+      return { message: `Interconsulta creada exitosamente`, consultation };
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
@@ -55,19 +53,27 @@ export class ConsultationInternalService {
     });
 
     if (!consultation) {
-      throw new NotFoundException(`Consulta interna con ID ${id} no encontrada`);
+      throw new NotFoundException(`Interconsulta con ID ${id} no encontrada`);
     }
     return consultation;
   }
 
-  async update(id: string, updateConsultationInternalDto: UpdateConsultationInternalDto) {
+  async update(
+    id: string,
+    updateConsultationInternalDto: UpdateConsultationInternalDto,
+  ) {
     try {
       const existingConsultation = await this.findOne(id);
-      const updatedConsultation = Object.assign(existingConsultation, updateConsultationInternalDto);
+      const updatedConsultation = Object.assign(
+        existingConsultation,
+        updateConsultationInternalDto,
+      );
 
       await this.consultationInternalRepository.save(updatedConsultation);
-      return { message: `Consulta interna actualizada exitosamente`, updatedConsultation };
-
+      return {
+        message: `Interconsulta actualizada exitosamente`,
+        updatedConsultation,
+      };
     } catch (error) {
       handleDBExceptions(error, this.logger);
     }
@@ -76,6 +82,19 @@ export class ConsultationInternalService {
   async remove(id: string) {
     const consultation = await this.findOne(id);
     await this.consultationInternalRepository.remove(consultation);
-    return { message: `Consulta interna eliminada correctamente` };
+    return { message: `Interconsulta eliminada correctamente` };
+  }
+
+  async findAllByUser(userId: string) {
+    try {
+      const consultations = await this.consultationInternalRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'patient'],
+      });
+
+      return consultations;
+    } catch (error) {
+      handleDBExceptions(error, this.logger);
+    }
   }
 }

@@ -8,6 +8,8 @@ import {
   Delete,
   ParseUUIDPipe,
   Query,
+  Res,
+  Logger,
 } from '@nestjs/common';
 import { LaboratoryRequestService } from './laboratory-request.service';
 import { CreateLaboratoryRequestDto } from './dto/create-laboratory-request.dto';
@@ -22,13 +24,64 @@ import {
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Role } from 'src/users/entities/user.entity';
+import { Response } from 'express';
+import { PdfService } from '../common/services/pdf.service';
 
 @ApiTags('Laboratory Requests')
 @Controller('laboratory-request')
 export class LaboratoryRequestController {
+  private readonly logger = new Logger(LaboratoryRequestController.name);
+
   constructor(
     private readonly laboratoryRequestService: LaboratoryRequestService,
-  ) { }
+    private readonly pdfService: PdfService,
+  ) {}
+
+  @Get('download')
+  @ApiOperation({ summary: 'Download all laboratory requests as PDF' })
+  async downloadRequests(@Res() res: Response) {
+    try {
+      this.logger.log('Iniciando descarga de solicitudes de laboratorio');
+      const { requests } = await this.laboratoryRequestService.findAll({
+        limit: 1000,
+        page: 1,
+      });
+      this.logger.log(`Encontradas ${requests.length} solicitudes`);
+
+      const buffer = await this.pdfService.generatePdf(
+        requests,
+        'Solicitudes de Laboratorio',
+      );
+      this.logger.log('PDF generado correctamente');
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=laboratory-requests.pdf',
+      });
+
+      res.send(buffer);
+    } catch (error) {
+      this.logger.error('Error al generar PDF:', error);
+      res.status(500).json({
+        message: 'Error al generar PDF',
+        error: error.message,
+      });
+    }
+  }
+
+// laboratory-request.controller.ts
+@Get('download/:id')
+@ApiOperation({ summary: 'Download one lab request as PDF' })
+async downloadOneRequest(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  const one = await this.laboratoryRequestService.findOne(id);
+  const buffer = await this.pdfService.generatePdf([one], 'Solicitud de Laboratorio');
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename=laboratorio-${id}.pdf`,
+  });
+  return res.send(buffer);
+}
+
 
   @Post()
   @Auth(Role.USER)
@@ -57,6 +110,17 @@ export class LaboratoryRequestController {
   })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.laboratoryRequestService.findAll(paginationDto);
+  }
+
+  @Get('user/:userId')
+  @Auth(Role.USER)
+  @ApiOperation({
+    summary:
+      'Obtener todas las solicitudes de laboratorio de un usuario específico',
+  })
+  @ApiParam({ name: 'userId', type: String, description: 'ID del usuario' })
+  findAllByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.laboratoryRequestService.findAllByUser(userId);
   }
 
   @Get(':id')

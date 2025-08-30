@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import {
   BadRequestException,
   Injectable,
@@ -137,6 +137,7 @@ export class UsersService {
       newUser = {
         ...user,
         ...restUser,
+        team: newTeam,
       };
     }
 

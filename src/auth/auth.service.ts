@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,7 +29,7 @@ export class AuthService {
         lastName: true,
         role: true,
       },
-      relations: ['team'],
+      relations: ['team', 'team.patient', 'team.patient.caregiver'],
     });
 
     if (!user) {
@@ -45,11 +45,19 @@ export class AuthService {
     }
 
     return {
+      id: user.id,
       document: user.document,
       name: user.name,
       lastName: user.lastName,
       role: user.role,
-      team: user.team,
+      team: user.team ? {
+        id: user.team.id,
+        teamName: user.team.teamName,
+        patient: user.team.patient ? {
+          ...user.team.patient,
+          caregivers: user.team.patient.map(p => p.caregiver)
+        } : null
+      } : null,
       token: this.getJwtToken({ id: user.id }),
     };
   }
